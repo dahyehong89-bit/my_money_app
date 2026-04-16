@@ -1,0 +1,516 @@
+{% load static %}
+{% load humanize ledger_extras %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>소중한 내 지갑</title>
+    <link rel="stylesheet" href="{% static 'account/css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="dashboard-3col">
+
+            <!-- 1단 -->
+            <section class="column column-left">
+                <div class="page-title-wrap">
+                    <h2 class="page-title">🌷 {{ selected_year }}년 {{ selected_month_num }}월 가계부</h2>
+                </div>
+                <form method="get" class="month-filter-wrap">
+                    <label for="month_picker">📅 월 선택</label>
+                    <div class="month-filter-row">
+                        <label for="month_picker" class="date-wrap">
+                            <input type="month" id="month_picker" name="month" value="{{ selected_month }}">
+                        </label>
+                        <button type="submit" class="mini-btn month-btn">조회</button>
+                    </div>
+                </form>
+
+                <div class="summary-card">
+                    <h3>✍️ 오늘 기록하기</h3>
+
+                    <form id="main_form" method="POST" action="{% url 'index' %}">
+                        {% csrf_token %}
+
+                        <label for="ui_date" class="date-wrap">
+                            <input type="date" name="date" id="ui_date" required value="{{ today|date:'Y-m-d' }}">
+                        </label>
+
+                        <select name="account_type" id="ui_account">
+                            <option value="hyundai">💳 현대카드</option>
+                            <option value="shinhan">🏦 신한카드</option>
+                            <option value="incident">🏥 사건비통장</option>
+                            <option value="cash_transfer">💵 현금/이체</option>
+                        </select>
+
+                        <input type="text" name="description" id="ui_desc" placeholder="내역 입력" required>
+
+                        <select name="category" id="ui_category">
+                            <option value="expense">지출</option>
+                            <option value="income">입금</option>
+                            <option value="non_expense">비지출</option>
+                        </select>
+
+                        <select name="detail_category" id="ui_detail_category">
+                            {% for label, value in detail_category_options %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <input type="number" name="amount" id="ui_amount" placeholder="금액" required>
+
+                        <label class="fuel-check">
+                            <input type="checkbox" name="is_fuel" id="ui_is_fuel" onchange="toggleFuelInput()">
+                            주유 항목
+                        </label>
+
+                        <div id="ui_fuel_section" style="display:none;">
+                            <input type="number" name="price_per_liter" id="ui_fuel_price" placeholder="리터당 단가">
+                        </div>
+
+                        <button type="button" onclick="openConfirmModal()" class="submit-btn">저장</button>
+                    </form>
+                </div>
+                <div class="summary-card">
+                    <h3>📌 신한카드 고정비</h3>
+
+                    <div class="fixed-grid">
+                        <button type="button" class="quick-fixed-btn"
+                                onclick="openFixedModal('통신비', '통신비', 103490, false, '')">
+                            📱 통신비
+                        </button>
+
+                        <button type="button" class="quick-fixed-btn"
+                                onclick="openFixedModal('인터넷', '인터넷', 26400, false, '')">
+                            🌐 인터넷
+                        </button>
+
+                        <button type="button" class="quick-fixed-btn"
+                                onclick="openFixedModal('쿠팡와우', '쿠팡와우', 7890, false, '')">
+                            📦 쿠팡와우
+                        </button>
+
+                        <button type="button" class="quick-fixed-btn"
+                                onclick="openFixedModal('이모티콘', '이모티콘', 3900, false, '')">
+                            💬 이모티콘
+                        </button>
+
+                        <button type="button" class="quick-fixed-btn"
+                                onclick="openFixedModal('주유', '주유', 60000, true, 1940)">
+                            ⛽ 주유
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2단 -->
+            <section class="column column-center">
+                <div class="summary-card">
+                    <h3>🗂 전체 거래 내역</h3>
+
+                    {% for item in history %}
+                    <div class="history-row">
+                        <div class="history-left history-left-vertical">
+                            <div class="history-meta">
+                                <span class="history-date">{{ item.date|date:"m/d" }}</span>
+                                <span class="
+                                    tag
+                                    {% if item.account_type == 'hyundai' %}
+                                        tag-hyundai
+                                    {% elif item.account_type == 'shinhan' %}
+                                        tag-shinhan
+                                    {% elif item.account_type == 'incident' %}
+                                        tag-incident
+                                    {% elif item.account_type == 'cash_transfer' %}
+                                        tag-cash
+                                    {% endif %}
+                                ">
+                                    {{ item.get_account_type_display }}
+                                </span>
+                                <span class="tag">{{ item.detail_category }}</span>
+                            </div>
+
+                            <div class="history-desc">
+                                {{ item.description|default:"-" }}
+                            </div>
+                        </div>
+
+                        <div class="history-actions">
+                            <strong class="
+                                {% if item.category == 'income' %}
+                                    income
+                                {% elif item.category == 'non_expense' %}
+                                    non-expense
+                                {% else %}
+                                    expense
+                                {% endif %}
+                            ">
+                                {{ item.amount|intcomma }}원
+                            </strong>
+                            <a href="{% url 'edit_transaction' item.pk %}" class="mini-btn">수정</a>
+                            <a href="{% url 'delete_transaction' item.pk %}" class="mini-btn danger" onclick="return confirm('삭제할까요?');">삭제</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="empty-text">거래 내역이 없습니다.</p>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- 3단 -->
+            <section class="column column-right">
+                <div class="summary-card budget-card">
+                    <h3>💳 현대카드 예산</h3>
+                    <p class="big-amount">{{ stats.hyundai|intcomma }}원 사용</p>
+                    <p class="sub-text">남은 금액:<strong class="left-money">{{ budget_left|intcomma }}원</strong></p>
+
+                    <div class="progress-wrap">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ hyundai_percent }}%;"></div>
+                        </div>
+                        <small>{{ hyundai_percent }}% 사용</small>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <h3>📊 카테고리 총 지출</h3>
+
+                    {% for item in category_summary_list %}
+                    <div class="history-row category-summary-row"
+                        data-category="{{ item.name }}"
+                        onclick="openCategoryModal(this.dataset.category)">
+                        <div class="history-left">
+                            <span class="tag">{{ item.icon }} {{ item.name }}</span>
+                        </div>
+                        <div>
+                            <strong class="expense">{{ item.total|intcomma }}원</strong>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="empty-text">지출 내역이 없습니다.</p>
+                    {% endfor %}
+                </div>
+
+                <div class="summary-card">
+                    <h3>📊 카드/통장별 세부 내역</h3>
+
+                    <details>
+                        <summary class="sum-hyundai">💳 현대카드 · {{ stats.hyundai|intcomma }}원</summary>
+                        {% for cat, items in hyundai_grouped.items %}
+                            <details>
+                                <summary>{{ cat }} · {{ items|length }}건 · {{ items|sum_amount|intcomma }}원</summary>
+                                {% for item in items %}
+                                <div class="detail-row">
+                                    <div class="detail-left">
+                                        <div class="detail-date">{{ item.date|date:"m/d" }}</div>
+                                        <div class="detail-desc">{{ item.description|default:"-" }}</div>
+                                    </div>
+                                    <strong class="detail-amount">{{ item.amount|intcomma }}원</strong>
+                                </div>
+                                {% endfor %}
+                            </details>
+                        {% empty %}
+                            <p class="empty-text">내역 없음</p>
+                        {% endfor %}
+                    </details>
+
+                    <details>
+                        <summary class="sum-shinhan">🏦 신한카드 · {{ stats.shinhan|intcomma }}원</summary>
+                        {% for cat, items in shinhan_grouped.items %}
+                            <details>
+                                <summary>{{ cat }} · {{ items|length }}건 · {{ items|sum_amount|intcomma }}원</summary>
+                                {% for item in items %}
+                                <div class="detail-row">
+                                    <div class="detail-left">
+                                        <div class="detail-date">{{ item.date|date:"m/d" }}</div>
+                                        <div class="detail-desc">{{ item.description|default:"-" }}</div>
+                                    </div>
+                                    <strong class="detail-amount">{{ item.amount|intcomma }}원</strong>
+                                </div>
+                                {% endfor %}
+                            </details>
+                        {% empty %}
+                            <p class="empty-text">내역 없음</p>
+                        {% endfor %}
+                    </details>
+
+                    <details>
+                        <summary class="sum-incident">🏥 사건비통장 · {{ stats.incident|intcomma }}원</summary>
+                        {% for cat, items in incident_grouped.items %}
+                            <details>
+                                <summary>{{ cat }} · {{ items|length }}건 · {{ items|sum_amount|intcomma }}원</summary>
+                                {% for item in items %}
+                                <div class="detail-row">
+                                    <div class="detail-left">
+                                        <div class="detail-date">{{ item.date|date:"m/d" }}</div>
+                                        <div class="detail-desc">{{ item.description|default:"-" }}</div>
+                                    </div>
+                                    <strong class="detail-amount">{{ item.amount|intcomma }}원</strong>
+                                </div>
+                                {% endfor %}
+                            </details>
+                        {% empty %}
+                            <p class="empty-text">내역 없음</p>
+                        {% endfor %}
+                    </details>
+
+                    <details>
+                        <summary class="sum-cash">💵 현금/이체 · {{ stats.cash_transfer|intcomma }}원</summary>
+                        {% for cat, items in cash_transfer_grouped.items %}
+                            <details>
+                                <summary>{{ cat }} · {{ items|length }}건 · {{ items|sum_amount|intcomma }}원</summary>
+                                {% for item in items %}
+                                <div class="detail-row">
+                                    <div class="detail-left">
+                                        <div class="detail-date">{{ item.date|date:"m/d" }}</div>
+                                        <div class="detail-desc">{{ item.description|default:"-" }}</div>
+                                    </div>
+                                    <strong class="detail-amount">{{ item.amount|intcomma }}원</strong>
+                                </div>
+                                {% endfor %}
+                            </details>
+                        {% empty %}
+                            <p class="empty-text">내역 없음</p>
+                        {% endfor %}
+                    </details>
+                </div>
+
+                <div class="summary-card">
+                    <h3>⛽ 주유 관리 (전체 기록)</h3>
+
+                    {% if fuel_detail_list %}
+                        {% for item in fuel_detail_list %}
+                        <div class="history-row">
+                            <div class="history-left history-left-vertical">
+                                <div class="history-meta">
+                                    <span class="history-date">{{ item.date }}</span>
+
+                                    <span class="tag {% if item.category == 'non_expense' %}tag-non-expense{% endif %}">
+                                        {% if item.category == 'non_expense' %}
+                                            비지출
+                                        {% else %}
+                                            {{ item.account_type }}
+                                        {% endif %}
+                                    </span>
+
+                                    {% if item.category == 'non_expense' and item.description %}
+                                        <span class="fuel-memo">{{ item.description }}</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="history-desc">
+                                    {{ item.amount|intcomma }}원
+                                    {% if item.price_per_liter %}
+                                        · {{ item.price_per_liter|floatformat:0|intcomma }}원/L
+                                    {% endif %}
+                                    {% if item.liters %}
+                                        · 약 {{ item.liters|floatformat:2 }}L
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <div class="fuel-summary-box">
+                            <div class="fuel-summary-line">
+                                <span>이번달 주유 합계</span>
+                                <strong class="expense">{{ fuel_total_amount|intcomma }}원</strong>
+                            </div>
+                            <div class="fuel-summary-line">
+                                <span>평균 단가</span>
+                                <strong>{{ fuel_avg_price|floatformat:0|intcomma }}원/L</strong>
+                            </div>
+                            <div class="fuel-summary-line">
+                                <span>총 주유량</span>
+                                <strong>{{ fuel_total_liters|floatformat:2 }}L</strong>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="empty-text">주유 내역이 없습니다.</p>
+                    {% endif %}
+                </div>
+
+                <div class="summary-card">
+                    <h3>✅ 체크리스트</h3>
+
+                    <div class="check-summary-box">
+                        <div class="check-summary-title">
+                            완료 {{ completed_check }}/{{ total_check }}
+                        </div>
+
+                        <div class="check-summary-amount">
+                            {{ check_done_amount|intcomma }}원 / {{ check_total_amount|intcomma }}원
+                        </div>
+                        <div class="check-summary-sub">
+                            완료금액 / 전체금액
+                        </div>
+                    </div>
+
+                    <details class="check-details" open>
+                        <summary>상세보기</summary>
+
+                        <div class="check-detail-list">
+                            {% for item in check_items %}
+                            <form method="post" action="{% url 'toggle_checklist' item.pk %}" class="check-form">
+                                {% csrf_token %}
+                                <label class="checklist-line">
+                                    <input type="checkbox"
+                                        {% if item.is_completed %}checked{% endif %}
+                                        onchange="this.form.submit()">
+
+                                    <span>
+                                        {{ item.content }} : {{ item.amount|intcomma }}원
+                                    </span>
+                                </label>
+                            </form>
+                            {% empty %}
+                            <p class="empty-text">체크리스트가 없습니다.</p>
+                            {% endfor %}
+                        </div>
+                    </details>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- 기록 확인 모달 -->
+    <div id="confirmModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <h3>기록 확인 및 수정 ✨</h3>
+
+            <form id="modal_form" method="POST" action="{% url 'index' %}">
+                {% csrf_token %}
+
+                <div class="modal-body">
+                    <div>
+                        <label>날짜</label>
+                        <input type="date" name="date" id="modal_date" class="modal-input" required>
+                    </div>
+
+                    <div>
+                        <label>내역</label>
+                        <input type="text" name="description" id="modal_desc" class="modal-input" required>
+                    </div>
+
+                    <div>
+                        <label>금액</label>
+                        <input type="number" name="amount" id="modal_amount" class="modal-input" required oninput="calcLiterInModal()">
+                    </div>
+
+                    <div class="modal-grid-2">
+                        <div>
+                            <label>수단</label>
+                            <select name="account_type" id="modal_account" class="modal-input">
+                                <option value="hyundai">현대카드</option>
+                                <option value="shinhan">신한카드</option>
+                                <option value="incident">사건비</option>
+                                <option value="cash_transfer">💸 현금/이체</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="modal_category">분류</label>
+                            <select name="category" id="modal_category" class="modal-input">
+                                <option value="expense">지출</option>
+                                <option value="income">입금</option>
+                                <option value="non_expense">비지출</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="modal_detail_category">세부 카테고리</label>
+                            <select name="detail_category" id="modal_detail_category">
+                                {% for label, value in detail_category_options %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="modal_fuel_section" class="fuel-info-box" style="display:none;">
+                        <label>⛽ 주유 정보</label>
+                        <input type="hidden" name="is_fuel" id="modal_is_fuel">
+                        <input type="number" name="price_per_liter" id="modal_fuel_price" placeholder="리터당 단가" class="modal-input" oninput="calcLiterInModal()">
+                        <p id="modal_calc_result"></p>
+                    </div>
+                </div>
+
+                <div class="modal-btn-row">                    
+                    <button type="button" onclick="closeModal('confirmModal')" class="modal-btn-cancel">취소</button>
+                    <button type="submit" class="modal-btn-confirm">이대로 저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 주유 차트 모달 -->
+    <div id="chartModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <h3>⛽ 주유 월별 통계 & 단가 변화</h3>
+            <canvas id="fuelChart" width="400" height="200"></canvas>
+            <button onclick="closeModal('chartModal')" style="margin-top:15px;">닫기</button>
+        </div>
+    </div>
+
+    <div id="categoryModal" class="custom-modal" style="display:none;">
+        <div class="custom-modal-content">
+            <div class="modal-header">
+                <h3 id="categoryModalTitle">카테고리 상세</h3>
+                <button type="button" class="modal-close" onclick="closeCategoryModal()">✕</button>
+            </div>
+
+            <div id="categoryModalBody">
+            </div>
+        </div>
+    </div>
+
+    <div id="fixedModal" class="fixed-modal-overlay" style="display:none;">
+        <div class="fixed-modal">
+            <div class="fixed-modal-header">
+                <h3 id="fixedModalTitle">빠른 입력</h3>
+                <button type="button" class="modal-close-btn" onclick="closeFixedModal()">✕</button>
+            </div>
+
+            <div class="fixed-modal-body">
+                <div class="modal-field">
+                    <label for="fixed_date">날짜</label>
+                    <input type="date" id="fixed_date">
+                </div>
+
+                <div class="modal-field">
+                    <label for="fixed_desc">사용처/메모</label>
+                    <input type="text" id="fixed_desc">
+                </div>
+
+                <div class="modal-field">
+                    <label for="fixed_amount">금액</label>
+                    <input type="number" id="fixed_amount">
+                </div>
+
+                <div class="modal-field">
+                    <label class="fuel-check">
+                        <input type="checkbox" id="fixed_is_fuel" onchange="toggleFuelFields()">
+                        주유 항목
+                    </label>
+                </div>
+
+                <div class="modal-field" id="fixed_price_wrap" style="display:none;">
+                    <label for="fixed_price_per_liter">리터당 단가</label>
+                    <input type="number" id="fixed_price_per_liter">
+                </div>
+            </div>
+
+            <div class="fixed-modal-actions">
+                <button type="button" class="mini-btn" onclick="closeFixedModal()">취소</button>
+                <button type="button" class="mini-btn" onclick="applyFixedModal()">입력하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script id="fuel_labels_data" type="application/json">{{ fuel_labels|safe }}</script>
+    <script id="fuel_prices_data" type="application/json">{{ fuel_prices|safe }}</script>
+    {{ category_detail_map|json_script:"category-detail-data" }}
+
+    <script src="{% static 'account/js/script.js' %}"></script>
+</body>
+</html>

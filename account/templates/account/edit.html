@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>거래 수정</title>
+    <link rel="stylesheet" href="{% static 'account/css/style.css' %}">
+</head>
+<body>
+    <div class="main-wrapper edit-wrapper">
+        <div class="summary-card edit-card">
+            <h3 class="edit-title">거래 수정</h3>
+
+            <form method="POST" class="edit-form">
+                {% csrf_token %}
+
+                <div class="edit-field">
+                    <label for="date">날짜</label>
+                    <input type="date" id="date" name="date" value="{{ item.date|date:'Y-m-d' }}" required>
+                </div>
+
+                <div class="edit-field">
+                    <label for="account_type">계좌/결제수단</label>
+                    <select id="account_type" name="account_type">
+                        <option value="hyundai" {% if item.account_type == 'hyundai' %}selected{% endif %}>현대카드</option>
+                        <option value="shinhan" {% if item.account_type == 'shinhan' %}selected{% endif %}>신한카드</option>
+                        <option value="incident" {% if item.account_type == 'incident' %}selected{% endif %}>사건비통장</option>
+                        <option value="cash_transfer" {% if item.account_type == 'cash_transfer' %}selected{% endif %}>현금/이체</option>
+                    </select>
+                </div>
+
+                <div class="edit-field">
+                    <label for="category">구분</label>
+                    <select id="category" name="category">
+                        <option value="expense" {% if item.category == 'expense' %}selected{% endif %}>지출</option>
+                        <option value="income" {% if item.category == 'income' %}selected{% endif %}>입금</option>
+                        <option value="non_expense" {% if item.category == 'non_expense' %}selected{% endif %}>비지출</option>
+                    </select>
+                </div>
+
+                <div class="edit-field">
+                    <label for="detail_category">상세 카테고리</label>
+                    <select id="detail_category" name="detail_category">
+                        {% for label, value in detail_category_options %}
+                        <option value="{{ value }}" {% if item.detail_category == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="edit-field">
+                    <label for="description">내용</label>
+                    <input type="text" id="description" name="description" value="{{ item.description }}" required>
+                </div>
+
+                <div class="edit-field">
+                    <label for="amount">금액</label>
+                    <input type="number" id="amount" name="amount" value="{{ item.amount }}" required>
+                </div>
+
+                <div class="edit-field edit-check-field">
+                    <label class="fuel-check" for="is_fuel">
+                        <input type="checkbox" id="is_fuel" name="is_fuel" {% if item.is_fuel %}checked{% endif %}>
+                        <span>주유 항목</span>
+                    </label>
+                </div>
+
+                <div class="edit-field">
+                    <label for="price_per_liter">리터당 단가</label>
+                    <input
+                        type="number"
+                        id="price_per_liter"
+                        name="price_per_liter"
+                        value="{{ item.price_per_liter|default_if_none:'' }}"
+                        placeholder="리터당 단가"
+                    >
+                </div>
+
+                <div class="edit-actions">
+                    <button type="submit" class="edit-save-btn">저장</button>
+                    <a href="{% url 'index' %}" class="mini-btn edit-cancel-btn">취소</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
