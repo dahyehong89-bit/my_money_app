@@ -320,5 +320,5 @@ function applyFixedModal() {
 
     closeFixedModal();
 
-    openConfirmModal();
+    document.getElementById("main_form").submit();
 }
