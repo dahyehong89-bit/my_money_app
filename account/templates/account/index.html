@@ -487,6 +487,23 @@
                     <input type="number" id="fixed_amount">
                 </div>
 
+                <div class="modal-field" id="fixed_category_wrap" style="display:none;">
+                    <label for="fixed_category">분류</label>
+                    <select id="fixed_category">
+                        <option value="expense">지출</option>
+                        <option value="non_expense">비지출</option>
+                    </select>
+                </div>
+
+                <div class="modal-field" id="fixed_detail_wrap">
+                    <label for="fixed_detail_category">세부 카테고리</label>
+                    <select id="fixed_detail_category">
+                        <option value="통신비">통신비</option>
+                        <option value="구독">구독</option>
+                        <option value="주유">주유</option>
+                    </select>
+                </div>
+
                 <div class="modal-field">
                     <label class="fuel-check">
                         <input type="checkbox" id="fixed_is_fuel" onchange="toggleFuelFields()">

@@ -255,9 +255,20 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 let fixedDetailName = "";
+let fixedMappedDetail = "";
 
 function openFixedModal(title, detail, amount, isFuel, price) {
     fixedDetailName = detail;
+
+    if (detail === "통신비" || detail === "인터넷") {
+        fixedMappedDetail = "통신비";
+    } else if (detail === "쿠팡와우" || detail === "이모티콘") {
+        fixedMappedDetail = "구독";
+    } else if (detail === "주유") {
+        fixedMappedDetail = "주유";
+    } else {
+        fixedMappedDetail = "기타";
+    }
 
     document.getElementById("fixedModalTitle").textContent = title + " 입력";
 
@@ -266,6 +277,22 @@ function openFixedModal(title, detail, amount, isFuel, price) {
     document.getElementById("fixed_amount").value = amount;
     document.getElementById("fixed_is_fuel").checked = isFuel;
     document.getElementById("fixed_price_per_liter").value = price || "";
+
+    const fixedCategoryWrap = document.getElementById("fixed_category_wrap");
+    const fixedCategory = document.getElementById("fixed_category");
+    const fixedDetailCategory = document.getElementById("fixed_detail_category");
+
+    if (fixedCategoryWrap) {
+        fixedCategoryWrap.style.display = isFuel ? "block" : "none";
+    }
+
+    if (fixedCategory) {
+        fixedCategory.value = "expense";
+    }
+
+    if (fixedDetailCategory) {
+        fixedDetailCategory.value = fixedMappedDetail;
+    }
 
     toggleFuelFields();
 
@@ -294,18 +321,28 @@ function applyFixedModal() {
         document.getElementById("fixed_date").value;
 
     document.getElementById("ui_account").value = "shinhan";
-    document.getElementById("ui_category").value = "expense";
 
-    document.getElementById("ui_detail_category").value =
-        fixedDetailName === "주유" ? "주유" : "고정비";
+    const isFuel = document.getElementById("fixed_is_fuel").checked;
+    const fixedCategory = document.getElementById("fixed_category");
+    const fixedDetailCategory = document.getElementById("fixed_detail_category");
+
+    if (isFuel && fixedCategory) {
+        document.getElementById("ui_category").value = fixedCategory.value;
+    } else {
+        document.getElementById("ui_category").value = "expense";
+    }
+
+    if (fixedDetailCategory) {
+        document.getElementById("ui_detail_category").value = fixedDetailCategory.value;
+    } else {
+        document.getElementById("ui_detail_category").value = fixedMappedDetail || "기타";
+    }
 
     document.getElementById("ui_desc").value =
         document.getElementById("fixed_desc").value;
 
     document.getElementById("ui_amount").value =
         document.getElementById("fixed_amount").value;
-
-    const isFuel = document.getElementById("fixed_is_fuel").checked;
 
     document.getElementById("ui_is_fuel").checked = isFuel;
 
@@ -319,6 +356,5 @@ function applyFixedModal() {
     }
 
     closeFixedModal();
-
     document.getElementById("main_form").submit();
 }
