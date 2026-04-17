@@ -3,56 +3,21 @@ from collections import defaultdict
 from django.utils import timezone
 from django.db.models import Sum
 from .models import Transaction, CheckList
+from .category_config import (
+    DETAIL_CATEGORY_OPTIONS,
+    CATEGORY_ICON_MAP,
+    DEFAULT_CHECKLIST_ITEMS,
+    HYUNDAI_MONTHLY_BUDGET,
+    LIVING_CATEGORY_MAP,
+)
 from datetime import date
+from calendar import monthrange
 import json
-
-DETAIL_CATEGORY_OPTIONS = [
-    ("🍽 외식", "외식"),
-    ("☕ 커피", "커피"),
-    ("🛵 배달", "배달"),
-    ("🛒 장보기", "장보기"),
-    ("🛍 쇼핑", "쇼핑"),
-    ("🧻 생활용품", "생활용품"),
-    ("💄 미용", "미용"),
-    ("⛽ 주유", "주유"),
-    ("🚌 교통", "교통"),
-    ("🏠 관리비", "관리비"),
-    ("🛡 보험", "보험"),
-    ("📱 통신비", "통신비"),
-    ("📺 구독", "구독"),
-    ("🏥 병원비", "병원비"),
-    ("🎗 경조사", "경조사"),
-    ("🎁 선물", "선물"),
-    ("✈️ 여행", "여행"),
-    ("💸 정산", "정산"),
-    ("📦 기타", "기타"),
-]
-
-CATEGORY_ICON_MAP = {
-    "외식": "🍽",
-    "커피": "☕",
-    "배달": "🛵",
-    "장보기": "🛒",
-    "쇼핑": "🛍",
-    "생활용품": "🧻",
-    "미용": "💄",
-    "주유": "⛽",
-    "교통": "🚌",
-    "관리비": "🏠",
-    "보험": "🛡",
-    "통신비": "📱",
-    "구독": "📺",
-    "병원비": "🏥",
-    "경조사": "🎗",
-    "선물": "🎁",
-    "여행": "✈️",
-    "정산": "💸",
-    "기타": "📦",
-}
 
 
 def index(request):
     if request.method == 'POST':
+        edit_pk = request.POST.get('edit_pk')
         date_value = request.POST.get('date')
         account_type = request.POST.get('account_type')
         category = request.POST.get('category')
@@ -72,18 +37,33 @@ def index(request):
         except (TypeError, ValueError):
             price_per_liter = None
 
-        Transaction.objects.create(
-            date=date_value,
-            account_type=account_type,
-            category=category,
-            detail_category=detail_category,
-            description=description,
-            amount=amount,
-            is_fuel=is_fuel,
-            price_per_liter=price_per_liter,
-        )
+        if edit_pk:
+            # 수정
+            item = get_object_or_404(Transaction, pk=edit_pk)
+            item.date = date_value
+            item.account_type = account_type
+            item.category = category
+            item.detail_category = detail_category
+            item.description = description
+            item.amount = amount
+            item.is_fuel = is_fuel
+            item.price_per_liter = price_per_liter
+            item.save()
+        else:
+            # 신규 생성
+            Transaction.objects.create(
+                date=date_value,
+                account_type=account_type,
+                category=category,
+                detail_category=detail_category,
+                description=description,
+                amount=amount,
+                is_fuel=is_fuel,
+                price_per_liter=price_per_liter,
+            )
 
-        return redirect('index')
+        saved_month = str(date_value)[:7]
+        return redirect(f"/?month={saved_month}")
 
     today = timezone.localdate()
 
@@ -100,19 +80,7 @@ def index(request):
 
     # 이번달 체크리스트 없으면 자동 생성
     if not CheckList.objects.filter(month=month_start).exists():
-        default_items = [
-            ("공용 생활비", 1000000),
-            ("사건비 통장", 200000),
-            ("수원 지역화폐 충전", 100000),
-            ("모임비", 190000),
-            ("정기 주차비", 80000),
-            ("적금", 300000),
-            ("청약", 20000),
-            ("보험료1", 23226),
-            ("보험료2", 60712),
-        ]
-
-        for name, amount in default_items:
+        for name, amount in DEFAULT_CHECKLIST_ITEMS:
             CheckList.objects.create(
                 month=month_start,
                 content=name,
@@ -120,7 +88,9 @@ def index(request):
                 is_completed=False,
             )
 
-    month_transactions = Transaction.objects.filter(
+    month_transactions = Transaction.objects.exclude(
+        account_type='living'
+    ).filter(
         date__year=month_start.year,
         date__month=month_start.month
     )
@@ -144,7 +114,7 @@ def index(request):
         'cash_transfer': get_monthly_total('cash_transfer'),
     }
 
-    budget_left = 600000 - stats['hyundai']
+    budget_left = HYUNDAI_MONTHLY_BUDGET - stats['hyundai']
 
     checklist_items = CheckList.objects.filter(
         month=month_start
@@ -226,7 +196,7 @@ def index(request):
     incident_grouped = group_by_detail_category(incident_items)
     cash_transfer_grouped = group_by_detail_category(cash_transfer_items)
 
-    hyundai_percent = int((stats['hyundai'] / 600000) * 100) if stats['hyundai'] > 0 else 0
+    hyundai_percent = int((stats['hyundai'] / HYUNDAI_MONTHLY_BUDGET) * 100) if stats['hyundai'] > 0 else 0
     if hyundai_percent > 100:
         hyundai_percent = 100
 
@@ -305,46 +275,324 @@ def index(request):
 
 def delete_transaction(request, pk):
     item = get_object_or_404(Transaction, pk=pk)
+
+    account_type = item.account_type
+    item_month = item.date.strftime("%Y-%m")
+
     item.delete()
-    return redirect('index')
 
-
-def edit_transaction(request, pk):
-    item = get_object_or_404(Transaction, pk=pk)
-
-    if request.method == 'POST':
-        item.date = request.POST.get('date')
-        item.account_type = request.POST.get('account_type')
-        item.category = request.POST.get('category')
-        item.detail_category = request.POST.get('detail_category', '기타')
-        item.description = request.POST.get('description')
-
-        try:
-            item.amount = int(request.POST.get('amount', 0))
-        except (TypeError, ValueError):
-            item.amount = 0
-
-        item.is_fuel = request.POST.get('is_fuel') == 'on'
-
-        try:
-            price_per_liter_raw = request.POST.get('price_per_liter')
-            item.price_per_liter = float(price_per_liter_raw) if price_per_liter_raw else None
-        except (TypeError, ValueError):
-            item.price_per_liter = None
-
-        item.save()
-        return redirect('index')
-
-    return render(request, 'account/edit.html', {
-        'item': item,
-        'detail_category_options': DETAIL_CATEGORY_OPTIONS,
-    })
+    if account_type == "living":
+        return redirect(f"/living/?month={item_month}")
+    elif account_type == "incident":
+        return redirect(f"/incident/?month={item_month}")
+    else:
+        return redirect(f"/?month={item_month}")
 
 
 def toggle_checklist(request, pk):
+    item = get_object_or_404(CheckList, pk=pk)
+
     if request.method == 'POST':
-        item = get_object_or_404(CheckList, pk=pk)
         item.is_completed = not item.is_completed
         item.save()
 
-    return redirect('index')
+    item_month = item.month.strftime("%Y-%m")
+    return redirect(f"/?month={item_month}")
+
+
+def living(request):
+    today = timezone.localdate()
+    selected_month = request.GET.get("month")
+
+    if selected_month:
+        try:
+            year, month = map(int, selected_month.split("-"))
+            month_start = date(year, month, 1)
+        except ValueError:
+            month_start = today.replace(day=1)
+    else:
+        month_start = today.replace(day=1)
+
+    last_day = monthrange(month_start.year, month_start.month)[1]
+    month_end = date(month_start.year, month_start.month, last_day)
+
+    if request.method == "POST":
+        edit_pk = request.POST.get("edit_pk")
+        selected_type = request.POST.get("category")   # income / expense / emergency / cash
+        detail_category = request.POST.get("detail_category", "기타")
+        description = request.POST.get("description")
+        amount = int(request.POST.get("amount", 0))
+
+        category = selected_type
+        saved_detail_category = detail_category
+
+        if selected_type == "income":
+            category = "income"
+
+        elif selected_type == "expense":
+            category = "expense"
+
+        elif selected_type == "emergency":
+            category = "non_expense"
+            saved_detail_category = detail_category
+
+            if detail_category == "비상금 넣기":
+                amount = abs(amount)
+            elif detail_category == "비상금 빼기":
+                amount = -abs(amount)
+
+        elif selected_type == "cash":
+            category = "non_expense"
+            saved_detail_category = detail_category
+
+            if detail_category == "현금 넣기":
+                amount = abs(amount)
+            elif detail_category == "현금 쓰기":
+                amount = -abs(amount)
+
+        if edit_pk:
+            # 수정
+            item = get_object_or_404(Transaction, pk=edit_pk)
+            item.date = request.POST.get("date")
+            item.account_type = "living"
+            item.category = category
+            item.detail_category = saved_detail_category
+            item.description = description
+            item.amount = amount
+            item.save()
+        else:
+            # 신규 생성
+            Transaction.objects.create(
+                date=request.POST.get("date"),
+                account_type="living",
+                category=category,
+                detail_category=saved_detail_category,
+                description=description,
+                amount=amount,
+            )
+
+        return redirect(f"/living/?month={month_start.strftime('%Y-%m')}")
+
+    # 이번 달 거래내역
+    month_transactions = Transaction.objects.filter(
+        account_type="living",
+        date__year=month_start.year,
+        date__month=month_start.month
+    ).order_by("-date", "-created_at")
+
+    # 전달 계산용
+    if month_start.month == 1:
+        prev_year = month_start.year - 1
+        prev_month = 12
+    else:
+        prev_year = month_start.year
+        prev_month = month_start.month - 1
+
+    prev_transactions = Transaction.objects.filter(
+        account_type="living",
+        date__year=prev_year,
+        date__month=prev_month
+    )
+
+    # 전달 입금 / 지출
+    prev_income = prev_transactions.filter(category="income").aggregate(
+        Sum("amount")
+    )["amount__sum"] or 0
+
+    prev_expense = prev_transactions.filter(category="expense").aggregate(
+        Sum("amount")
+    )["amount__sum"] or 0
+
+    # 전달 비상금 / 현금 변동
+    prev_emergency = prev_transactions.filter(
+        category="non_expense",
+        detail_category__startswith="비상금"
+    ).aggregate(
+        Sum("amount")
+    )["amount__sum"] or 0
+
+    prev_cash = prev_transactions.filter(
+        category="non_expense",
+        detail_category__startswith="현금"
+    ).aggregate(
+        Sum("amount")
+    )["amount__sum"] or 0
+
+    # 전달 이월금액 = 전달 말 기준 가용생활비
+    # 현금은 가용생활비 차감 대상 아님
+    carry_over = prev_income - prev_expense - prev_emergency
+
+    # 이번 달 입금 / 지출
+    total_income = month_transactions.filter(category="income").aggregate(
+        Sum("amount")
+    )["amount__sum"] or 0
+
+    total_expense = month_transactions.filter(category="expense").aggregate(
+        Sum("amount")
+    )["amount__sum"] or 0
+
+    # 이번 달 비상금 / 현금 변동
+    month_emergency = month_transactions.filter(
+        category="non_expense",
+        detail_category__startswith="비상금"
+    ).aggregate(
+        Sum("amount")
+    )["amount__sum"] or 0
+
+    month_cash = month_transactions.filter(
+        category="non_expense",
+        detail_category__startswith="현금"
+    ).aggregate(
+        Sum("amount")
+    )["amount__sum"] or 0
+
+    # 이번 달 가용생활비
+    # 비상금만 가용생활비에서 빠짐 / 현금은 별도 기록만
+    available_living = (
+        carry_over
+        + total_income
+        - total_expense
+        - month_emergency
+    )
+
+    # 비상금 누적액 (선택월 말일까지)
+    emergency_total = Transaction.objects.filter(
+        account_type="living",
+        date__lte=month_end,
+        category="non_expense",
+        detail_category__startswith="비상금"
+    ).aggregate(
+        Sum("amount")
+    )["amount__sum"] or 0
+
+    # 현금보유액 누적액 (선택월 말일까지)
+    cash_total = Transaction.objects.filter(
+        account_type="living",
+        date__lte=month_end,
+        category="non_expense",
+        detail_category__startswith="현금"
+    ).aggregate(
+        Sum("amount")
+    )["amount__sum"] or 0
+
+    # 총 보유 생활비
+    total_living_assets = available_living + emergency_total + cash_total
+
+    # 카테고리별 지출 집계
+    category_summary = defaultdict(int)
+    category_detail_map = defaultdict(list)
+
+    for item in month_transactions.filter(category='expense').order_by('-date', '-created_at'):
+        category_name = item.detail_category or "기타"
+        category_summary[category_name] += abs(item.amount)
+
+        category_detail_map[category_name].append({
+            'date': item.date.strftime('%m/%d'),
+            'account_type': item.get_account_type_display(),
+            'description': item.description,
+            'amount': abs(item.amount),
+        })
+
+    category_summary = dict(
+        sorted(category_summary.items(), key=lambda x: x[1], reverse=True)
+    )
+
+    category_summary_list = []
+    for cat_name, cat_total in category_summary.items():
+        category_summary_list.append({
+            'name': cat_name,
+            'icon': CATEGORY_ICON_MAP.get(cat_name, '📦'),
+            'total': cat_total,
+        })
+
+    category_detail_map = dict(category_detail_map)
+
+    # 도넛 차트용 JSON
+    chart_labels = [f"{item['icon']} {item['name']}" for item in category_summary_list]
+    chart_values = [item['total'] for item in category_summary_list]
+
+    # 관리비 1년치 막대 그래프용 데이터
+    rent_chart_labels = []
+    rent_chart_values = []
+
+    for i in range(11, -1, -1):
+        m = month_start.month - i
+        y = month_start.year
+        while m <= 0:
+            m += 12
+            y -= 1
+
+        rent_month_total = Transaction.objects.filter(
+            account_type="living",
+            category="expense",
+            detail_category__in=["주거비", "관리비"],
+            date__year=y,
+            date__month=m,
+        ).aggregate(Sum("amount"))["amount__sum"] or 0
+
+        rent_chart_labels.append(f"{m}월")
+        rent_chart_values.append(abs(rent_month_total))
+
+    # 최근 12개월 관리비 추이
+    rent_labels = []
+    rent_values = []
+
+    for i in range(11, -1, -1):
+        y = month_start.year
+        m = month_start.month - i
+
+        while m <= 0:
+            y -= 1
+            m += 12
+
+        while m > 12:
+            y += 1
+            m -= 12
+
+        month_label = f"{y % 100:02d}.{m:02d}"
+        rent_labels.append(month_label)
+
+        monthly_rent_total = Transaction.objects.filter(
+            account_type="living",
+            date__year=y,
+            date__month=m,
+            category="expense",
+            detail_category="주거비"
+        ).aggregate(Sum("amount"))["amount__sum"] or 0
+
+        rent_values.append(abs(monthly_rent_total))
+
+    context = {
+        "today": today,
+        "selected_month": month_start.strftime("%Y-%m"),
+        "selected_year": month_start.year,
+        "selected_month_num": month_start.month,
+        "history": month_transactions[:30],
+        "detail_category_options": DETAIL_CATEGORY_OPTIONS,
+
+        "living_category_map_json": json.dumps(LIVING_CATEGORY_MAP, ensure_ascii=False),
+
+        "living_income": total_income,
+        "living_expense": total_expense,
+        "living_balance": available_living,
+
+        "carry_over": carry_over,
+        "available_living": available_living,
+        "emergency_total": emergency_total,
+        "cash_total": cash_total,
+        "total_living_assets": total_living_assets,
+
+        "category_summary_list": category_summary_list,
+        "category_detail_map": category_detail_map,
+        "category_icon_map": CATEGORY_ICON_MAP,
+        
+        "chart_labels_json": chart_labels,
+        "chart_values_json": chart_values,
+
+        "rent_chart_labels_json": rent_labels,
+        "rent_chart_values_json": rent_values,
+
+        "living_category_map_json": LIVING_CATEGORY_MAP,
+    }
+
+    return render(request, "account/living.html", context)

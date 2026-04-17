@@ -39,6 +39,10 @@ body {
     color: var(--text-color);
 }
 
+/* =========================
+   레이아웃
+========================= */
+
 .main-wrapper {
     width: 100%;
     max-width: 1400px;
@@ -68,12 +72,9 @@ body {
     scroll-behavior: smooth;
 }
 
-.column-center,
-.column-left,
-.column-right {
-    position: relative;
-    top: auto;
-}
+/* =========================
+   컬럼 스크롤바
+========================= */
 
 .column::-webkit-scrollbar {
     width: 8px;
@@ -87,6 +88,35 @@ body {
 .column::-webkit-scrollbar-track {
     background: transparent;
 }
+
+/* 컬럼 내부 스크롤바 숨기기 */
+.column-left,
+.column-center,
+.column-right {
+    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;   /* IE/구형 Edge */
+}
+
+.column-left::-webkit-scrollbar,
+.column-center::-webkit-scrollbar,
+.column-right::-webkit-scrollbar {
+    display: none;              /* Chrome / Safari / Edge */
+}
+
+.column-center {
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+}
+
+.column-center .summary-card,
+.column-right .summary-card,
+.column-left .summary-card {
+    text-align: left;
+}
+
+/* =========================
+   카드 공통
+========================= */
 
 .summary-card,
 .card,
@@ -121,6 +151,10 @@ body {
     color: #8a5a5a;
 }
 
+/* =========================
+   금액 / 텍스트
+========================= */
+
 .big-amount {
     font-size: 1.7rem;
     font-weight: 800;
@@ -138,6 +172,10 @@ body {
     color: #5f8fd8;
     font-weight: 800;
 }
+
+/* =========================
+   프로그레스 바
+========================= */
 
 .progress-wrap {
     margin-top: 12px;
@@ -161,6 +199,10 @@ body {
 .checklist-fill {
     background: linear-gradient(90deg, #8fd3c7, #b7e4c7);
 }
+
+/* =========================
+   폼 요소 공통
+========================= */
 
 input,
 select,
@@ -189,7 +231,7 @@ select {
     background-position: right 15px center;
     background-size: 18px;
     padding-right: 40px;
-	cursor:pointer;
+    cursor: pointer;
 }
 
 button {
@@ -207,6 +249,10 @@ button:hover {
     box-shadow: 0 5px 15px rgba(255, 182, 193, 0.35);
 }
 
+/* =========================
+   메인 폼
+========================= */
+
 #main_form {
     display: flex;
     flex-direction: column;
@@ -217,8 +263,12 @@ button:hover {
 #main_form select,
 #main_form button {
     margin-bottom: 0;
-	cursor: pointer;
+    cursor: pointer;
 }
+
+/* =========================
+   주유 체크 / 연료 섹션
+========================= */
 
 .fuel-check {
     display: flex;
@@ -244,6 +294,10 @@ button:hover {
     border: 1px dashed #ffd7dc;
 }
 
+/* =========================
+   버튼 스타일
+========================= */
+
 .submit-btn {
     background: var(--accent-color);
     color: white;
@@ -255,39 +309,74 @@ button:hover {
     background: #ff7d87;
 }
 
+.mini-btn {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 10px;
+    background: #f3e8ea;
+    color: var(--text-color);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    white-space: nowrap;
+}
+
+.mini-btn.danger {
+    background: #ffe3e6;
+    color: #d9534f;
+}
+
+/* =========================
+   거래 내역 행
+========================= */
+
 .history-row,
 .history-item,
-.detail-row,
 .modal-history-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
     width: 100%;
 }
 
-.history-row,
+.history-row {
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px dashed var(--line-pink);
+}
+
 .history-item {
+    gap: 12px;
     padding: 12px 0;
     border-bottom: 1px dashed var(--line-pink);
 }
 
 .detail-row {
-    padding: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
     border-bottom: 1px dashed #f1d6d6;
 }
 
 .modal-history-row {
+    gap: 12px;
     padding: 10px 0;
     border-bottom: 1px solid #eee;
 }
 
 .history-row:last-child,
-.detail-row:last-child,
 .history-item:last-child,
+.detail-row:last-child,
 .modal-history-row:last-child {
     border-bottom: none;
 }
+
+/* =========================
+   거래 내역 좌/우 영역
+========================= */
 
 .history-left,
 .modal-history-left {
@@ -302,49 +391,6 @@ button:hover {
 .history-left span:last-child,
 .modal-history-left span:last-child {
     word-break: break-word;
-}
-
-.detail-desc {
-    flex: 1;
-    min-width: 0;
-    word-break: break-word;
-}
-
-.detail-amount {
-    flex-shrink: 0;
-    min-width: 96px;
-    text-align: right;
-    display: inline-block;
-    color: #b85c5c;
-    font-weight: 800;
-}
-
-.history-date {
-    background: #f2f2f2;
-    padding: 3px 8px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #7f6f71;
-}
-
-.tag {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: #f8dfe3;
-    color: #9c6268;
-    font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.2;
-}
-
-.history-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    padding: 14px 0;
 }
 
 .history-left-vertical {
@@ -386,6 +432,19 @@ button:hover {
     text-align: right;
 }
 
+.history-date {
+    background: #f2f2f2;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #7f6f71;
+}
+
+/* =========================
+   금액 색상
+========================= */
+
 .income,
 .amount-income {
     color: #4dabf7;
@@ -404,13 +463,68 @@ button:hover {
     font-weight: 700;
 }
 
+/* =========================
+   태그
+========================= */
+
+.tag {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #f8dfe3;
+    color: #9c6268;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.tag-hyundai,
+.tag-shinhan,
+.tag-incident,
+.tag-cash {
+    font-weight: 700;
+}
+
+.tag-hyundai {
+    background: #f3f3f3;
+    color: #555;
+    border: 1px solid #e1e1e1;
+}
+
+.tag-shinhan {
+    background: #eef4ff;
+    color: #3b6fd8;
+    border: 1px solid #d6e4ff;
+}
+
+.tag-incident {
+    background: #faf0ff;
+    color: #a64db6;
+    border: 1px solid #efd7ff;
+}
+
+.tag-cash {
+    background: #eefaf2;
+    color: #2d8a57;
+    border: 1px solid #d8f0df;
+}
+
+.tag-non-expense {
+    background: #eef1ff !important;
+    color: #6c7bd1 !important;
+    border: 1px solid #d9defc;
+}
+
 .empty-text {
     color: #b28b90;
     font-size: 0.9rem;
     margin: 8px 0 0;
 }
 
-/* details / summary */
+/* =========================
+   details / summary (접이식)
+========================= */
+
 details {
     margin-top: 12px;
     background: #fffafb;
@@ -422,19 +536,6 @@ details {
 
 details[open] {
     box-shadow: 0 6px 18px rgba(255, 182, 193, 0.12);
-}
-
-.detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px dashed #f1d6d6;
-}
-
-.detail-row:last-child {
-    border-bottom: none;
 }
 
 .detail-left {
@@ -454,6 +555,9 @@ details[open] {
 .detail-desc {
     font-size: 14px;
     color: #7b5b5b;
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -464,6 +568,9 @@ details[open] {
     font-weight: 700;
     color: #cf6b6b;
     flex-shrink: 0;
+    min-width: 96px;
+    text-align: right;
+    display: inline-block;
 }
 
 summary {
@@ -473,8 +580,7 @@ summary {
     color: var(--text-color);
 }
 
-summary::-webkit-details-marker,
-details summary::-webkit-details-marker {
+summary::-webkit-details-marker {
     display: none;
 }
 
@@ -527,64 +633,41 @@ details details summary {
     padding: 6px 8px;
 }
 
+/* =========================
+   합계 뱃지 (카드사별)
+========================= */
+
+.sum-hyundai,
+.sum-shinhan,
+.sum-incident,
+.sum-cash {
+    border-radius: 10px;
+    padding: 8px 12px;
+}
+
 .sum-hyundai {
     color: #666;
     background: #f5f5f5;
-    border-radius: 10px;
-    padding: 8px 12px;
 }
 
 .sum-shinhan {
     color: #3b6fd8;
     background: #eef4ff;
-    border-radius: 10px;
-    padding: 8px 12px;
 }
 
 .sum-incident {
     color: #a64db6;
     background: #faf0ff;
-    border-radius: 10px;
-    padding: 8px 12px;
 }
 
 .sum-cash {
     color: #2d8a57;
     background: #eefaf2;
-    border-radius: 10px;
-    padding: 8px 12px;
 }
 
-.tag-hyundai,
-.tag-shinhan,
-.tag-incident,
-.tag-cash {
-    font-weight: 700;
-}
-
-.tag-hyundai {
-    background: #f3f3f3;
-    color: #555;
-    border: 1px solid #e1e1e1;
-}
-
-.tag-shinhan {
-    background: #eef4ff;
-    color: #3b6fd8;
-    border: 1px solid #d6e4ff;
-}
-
-.tag-incident {
-    background: #faf0ff;
-    color: #a64db6;
-    border: 1px solid #efd7ff;
-}
-
-.tag-cash {
-    background: #eefaf2;
-    color: #2d8a57;
-    border: 1px solid #d8f0df;
-}
+/* =========================
+   체크리스트
+========================= */
 
 .check-item,
 .checklist-item {
@@ -607,6 +690,10 @@ details details summary {
     margin: 0;
 }
 
+/* =========================
+   모달 (공통)
+========================= */
+
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -624,9 +711,16 @@ details details summary {
     border-radius: 26px;
     width: 90%;
     max-width: 450px;
-    max-height: 80vh;
+    /* max-height: 80vh; */
     overflow-y: auto;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* 넓은 2단 모달 */
+.modal-content-wide {
+    max-width: 580px;
+    max-height: none;
+    overflow-y: visible;
 }
 
 .modal-body {
@@ -635,6 +729,23 @@ details details summary {
     gap: 12px;
     margin-top: 16px;
     text-align: left;
+}
+
+/* 2단 그리드 모달 바디 */
+.modal-body.modal-body-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+@media (max-width: 600px) {
+    .modal-content-wide {
+        max-width: 95%;
+    }
+
+    .modal-body.modal-body-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .modal-body label {
@@ -664,20 +775,6 @@ details details summary {
     gap: 10px;
 }
 
-.fuel-info-box {
-    background: #fff7f8;
-    padding: 12px;
-    border-radius: 16px;
-    border: 1px dashed #ffd7dc;
-}
-
-#modal_calc_result {
-    font-size: 0.85rem;
-    color: #d96b77;
-    margin-top: 8px;
-    font-weight: 700;
-}
-
 .modal-btn-row {
     display: flex;
     gap: 10px;
@@ -701,6 +798,67 @@ details details summary {
 .modal-btn-cancel {
     background: #f3e8ea;
     color: var(--text-color);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.modal-close {
+    border: none;
+    background: none;
+    font-size: 20px;
+    cursor: pointer;
+    width: auto;
+    padding: 0 4px;
+    color: #9c6268;
+}
+
+/* =========================
+   커스텀 모달
+========================= */
+
+.custom-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.custom-modal-content {
+    width: 100%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* =========================
+   연료 관련
+========================= */
+
+.fuel-info-box {
+    background: #fff7f8;
+    padding: 12px;
+    border-radius: 16px;
+    border: 1px dashed #ffd7dc;
+}
+
+#modal_calc_result {
+    font-size: 0.85rem;
+    color: #d96b77;
+    margin-top: 8px;
+    font-weight: 700;
 }
 
 .btn-fuel {
@@ -748,24 +906,6 @@ details details summary {
     font-size: 0.75rem;
 }
 
-.grid-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.column-center{max-height: calc(100vh - 40px);overflow-y: auto;}
-
-.column-center .summary-card {
-    text-align: left;
-}
-
-.column-right .summary-card,
-.column-left .summary-card {
-    text-align: left;
-}
-
 .fuel-summary-box {
     margin-top: 14px;
     padding-top: 12px;
@@ -791,12 +931,6 @@ details details summary {
     font-weight: 800;
 }
 
-.tag-non-expense {
-    background: #eef1ff !important;
-    color: #6c7bd1 !important;
-    border: 1px solid #d9defc;
-}
-
 .fuel-memo {
     font-size: 12px;
     color: #888;
@@ -811,6 +945,21 @@ details details summary {
 .fuel-history-line {
     margin-top: 8px;
 }
+
+/* =========================
+   그리드 / 기타 레이아웃
+========================= */
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* =========================
+   월별 필터
+========================= */
 
 .month-filter-wrap {
     display: flex;
@@ -828,9 +977,8 @@ details details summary {
     padding: 8px 10px;
     border: 1px solid #f0caca;
     border-radius: 10px;
-	cursor: pointer;
+    cursor: pointer;
 }
-
 
 .month-title {
     display: block;
@@ -865,28 +1013,14 @@ details details summary {
     height: 44px;
     border-radius: 12px;
     font-weight: 700;
-	background: #f7eded;
+    background: #f7eded;
     color: #9a6666;
     border: none;
 }
 
-.mini-btn {
-    display: inline-block;
-    padding: 6px 10px;
-    border-radius: 10px;
-    background: #f3e8ea;
-    color: var(--text-color);
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-decoration: none;
-    border: none;
-    white-space: nowrap;
-}
-
-.mini-btn.danger {
-    background: #ffe3e6;
-    color: #d9534f;
-}
+/* =========================
+   카테고리 요약
+========================= */
 
 .category-summary-row {
     cursor: pointer;
@@ -901,44 +1035,9 @@ details details summary {
     transform: translateY(-1px);
 }
 
-.custom-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.35);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    padding: 20px;
-}
-
-.custom-modal-content {
-    width: 100%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-    background: #fff;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.modal-close {
-    border: none;
-    background: none;
-    font-size: 20px;
-    cursor: pointer;
-    width: auto;
-    padding: 0 4px;
-    color: #9c6268;
-}
+/* =========================
+   체크 요약 / 상세
+========================= */
 
 .check-summary-box {
     background: #fcfcfc;
@@ -958,6 +1057,18 @@ details details summary {
 .check-summary-amount {
     font-size: 0.95rem;
     color: #6f6f6f;
+}
+
+.check-summary-sub {
+    margin-top: 4px;
+    font-size: 0.82rem;
+    color: #9a8c8f;
+}
+
+.check-summary-left {
+    margin-top: 6px;
+    font-size: 0.9rem;
+    color: #8a7a7d;
 }
 
 .check-details {
@@ -1056,18 +1167,6 @@ details details summary {
     word-break: break-word;
 }
 
-.check-summary-sub {
-    margin-top: 4px;
-    font-size: 0.82rem;
-    color: #9a8c8f;
-}
-
-.check-summary-left {
-    margin-top: 6px;
-    font-size: 0.9rem;
-    color: #8a7a7d;
-}
-
 .check-link {
     text-decoration: none;
     color: inherit;
@@ -1078,7 +1177,7 @@ details details summary {
 }
 
 /* =========================
-   신한카드 고정비 빠른입력 버튼
+   신한카드 고정비 빠른입력
 ========================= */
 
 .fixed-grid {
@@ -1280,26 +1379,9 @@ details details summary {
     filter: brightness(0.98);
 }
 
-@media (max-width: 768px) {
-    .fixed-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-    }
-
-    .fixed-modal {
-        max-width: 100%;
-        padding: 20px 16px 16px;
-        border-radius: 18px;
-    }
-
-    .fixed-modal-header h3 {
-        font-size: 20px;
-    }
-
-    .fixed-modal-actions {
-        flex-direction: column;
-    }
-}
+/* =========================
+   반응형 (900px 이하)
+========================= */
 
 @media (max-width: 900px) {
     html,
@@ -1358,7 +1440,32 @@ details details summary {
 }
 
 /* =========================
-   edit.html
+   반응형 (768px 이하)
+========================= */
+
+@media (max-width: 768px) {
+    .fixed-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .fixed-modal {
+        max-width: 100%;
+        padding: 20px 16px 16px;
+        border-radius: 18px;
+    }
+
+    .fixed-modal-header h3 {
+        font-size: 20px;
+    }
+
+    .fixed-modal-actions {
+        flex-direction: column;
+    }
+}
+
+/* =========================
+   edit.html 수정 페이지
 ========================= */
 
 .edit-wrapper {
@@ -1422,19 +1529,16 @@ details details summary {
     margin-top: 4px;
 }
 
-.fuel-check {
+.edit-form .fuel-check {
     display: inline-flex;
-    align-items: center;
-    gap: 8px;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
 }
 
-.fuel-check input[type="checkbox"] {
+.edit-form .fuel-check input[type="checkbox"] {
     width: 16px;
     height: 16px;
-    margin: 0;
 }
 
 .edit-actions {
@@ -1476,4 +1580,882 @@ details details summary {
     .edit-cancel-btn {
         width: 100%;
     }
+}
+
+/* =========================================================
+   생활비 통장 테마 (living-page)
+========================================================= */
+
+body.living-page {
+    background: #f4fbf8;
+}
+
+body.living-page .page-title {
+    color: #2f6f60;
+}
+
+/* 카드 */
+body.living-page .summary-card {
+    background: #ffffff;
+    border: 2px dashed #b8dfd1 !important;
+    border-radius: 24px;
+    box-shadow: 0 8px 20px rgba(80, 140, 120, 0.06);
+}
+
+body.living-page .budget-card {
+    background: linear-gradient(180deg, #eefaf5 0%, #ffffff 100%);
+}
+
+/* 버튼 */
+body.living-page .submit-btn,
+body.living-page .quick-fixed-btn,
+body.living-page .month-btn {
+    background: #7cc9b1;
+    color: #fff;
+    border: none;
+}
+
+body.living-page .submit-btn:hover,
+body.living-page .quick-fixed-btn:hover,
+body.living-page .month-btn:hover {
+    background: #67b79d;
+}
+
+/* 태그 */
+/* 생활비 태그 공통 */
+.living-page .tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    border: 1px solid transparent;
+}
+
+/* 입금 */
+.living-page .tag-income {
+    background: #eef3ff;
+    color: #4b6bff;
+    border-color: #d9e3ff;
+}
+
+/* 지출 */
+.living-page .tag-expense {
+    background: #fff3ea;
+    color: #dd7a45;
+    border-color: #ffd8c2;
+}
+
+/* 비상금 */
+.living-page .tag-emergency {
+    background: #fff8d9;
+    color: #a77700;
+    border-color: #f2dd8a;
+}
+
+/* 현금 */
+.living-page .tag-cash {
+    background: #e8fff4;
+    color: #12936b;
+    border-color: #bfe9d7;
+}
+
+/* 상세 카테고리 공통 */
+.living-page .tag-detail {
+    background: #f3fbf7;
+    color: #2f6f60;
+    border-color: #d5ece3;
+}
+
+/* 계좌 뱃지 */
+body.living-page .living-account-badge {
+    display: inline-block;
+    padding: 18px 12px;
+    border-radius: 18px;
+    background: #dff5ed;
+    color: #2f6f60;
+    font-weight: 700;
+}
+
+/* 입력 요소 테두리 */
+body.living-page input,
+body.living-page select,
+body.living-page button,
+body.living-page .date-wrap input[type="month"] {
+    border-color: #b8dfd1;
+}
+
+body.living-page input[type="checkbox"] {
+    accent-color: #7cc9b1;
+}
+
+/* ----- 모달 민트 테마 ----- */
+
+body.living-page .modal,
+body.living-page .modal-overlay,
+body.living-page .fixed-modal-wrap {
+    background: rgba(50, 80, 70, 0.35) !important;
+}
+
+body.living-page .modal-content,
+body.living-page .fixed-modal,
+body.living-page .modal-box {
+    background: #ffffff !important;
+    border: 2px dashed #b8dfd1 !important;
+    border-radius: 28px !important;
+    box-shadow: 0 18px 35px rgba(70, 130, 110, 0.12) !important;
+}
+
+body.living-page .modal-content h2,
+body.living-page .modal-content h3,
+body.living-page .modal-title {
+    color: #2f6f60 !important;
+}
+
+body.living-page .modal-content label,
+body.living-page .fixed-modal label {
+    color: #855d5d !important;
+    font-weight: 700;
+}
+
+body.living-page .close-modal,
+body.living-page .modal-close,
+body.living-page .modal-close-btn {
+    color: #6fae98 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+body.living-page .close-modal:hover,
+body.living-page .modal-close:hover,
+body.living-page .modal-close-btn:hover {
+    color: #4e8e77 !important;
+}
+
+body.living-page .modal-content input,
+body.living-page .modal-content select,
+body.living-page .modal-content textarea,
+body.living-page .fixed-modal input,
+body.living-page .fixed-modal select,
+body.living-page .fixed-modal textarea,
+body.living-page .modal-input {
+    border: 2px solid #b8dfd1 !important;
+    border-radius: 18px !important;
+    background: #ffffff !important;
+    color: #2f6f60 !important;
+    box-shadow: none !important;
+}
+
+body.living-page .modal-content input:focus,
+body.living-page .modal-content select:focus,
+body.living-page .modal-content textarea:focus,
+body.living-page .fixed-modal input:focus,
+body.living-page .fixed-modal select:focus,
+body.living-page .fixed-modal textarea:focus,
+body.living-page .modal-input:focus {
+    border-color: #7cc9b1 !important;
+    box-shadow: 0 0 0 3px rgba(124, 201, 177, 0.12) !important;
+    outline: none !important;
+}
+
+body.living-page .modal-content input::placeholder,
+body.living-page .modal-content textarea::placeholder {
+    color: #9ab8ad;
+}
+
+/* 모달 체크박스 박스 */
+body.living-page .fuel-check,
+body.living-page .fuel-box,
+body.living-page .checkbox-row,
+body.living-page .check-row,
+body.living-page .modal-content .fuel-check,
+body.living-page .fixed-modal .fuel-check {
+    border: 2px dashed #b8dfd1 !important;
+    border-radius: 18px !important;
+    background: #ffffff !important;
+    color: #2f6f60 !important;
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+}
+
+body.living-page .fuel-check label,
+body.living-page .fuel-box label,
+body.living-page .checkbox-row label {
+    color: #2f6f60 !important;
+    font-weight: 600;
+}
+
+/* 모달 하단 버튼 */
+body.living-page .modal-btn-row button,
+body.living-page .fixed-modal-actions button,
+body.living-page .modal-btn-cancel,
+body.living-page .modal-btn-confirm,
+body.living-page .modal-cancel,
+body.living-page .btn-cancel,
+body.living-page .modal-submit,
+body.living-page .btn-submit,
+body.living-page .confirm-btn {
+    border-radius: 16px !important;
+    height: 44px;
+    font-weight: 700;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+body.living-page .modal-btn-cancel,
+body.living-page .modal-cancel,
+body.living-page .btn-cancel,
+body.living-page .fixed-modal-actions button:first-child {
+    background: #edf7f3 !important;
+    color: #4c7c6e !important;
+}
+
+body.living-page .modal-btn-confirm,
+body.living-page .modal-submit,
+body.living-page .btn-submit,
+body.living-page .confirm-btn,
+body.living-page .fixed-modal-actions button:last-child {
+    background: #7cc9b1 !important;
+    color: #ffffff !important;
+}
+
+body.living-page .modal-btn-confirm:hover,
+body.living-page .modal-submit:hover,
+body.living-page .btn-submit:hover,
+body.living-page .confirm-btn:hover,
+body.living-page .fixed-modal-actions button:last-child:hover {
+    background: #69b79f !important;
+}
+
+body.living-page .modal-btn-cancel:hover,
+body.living-page .modal-cancel:hover,
+body.living-page .btn-cancel:hover,
+body.living-page .fixed-modal-actions button:first-child:hover {
+    background: #dff1ea !important;
+}
+
+/* ----- 레이아웃 ----- */
+
+.living-page .dashboard-3col {
+    display: grid;
+    grid-template-columns: 1.05fr 1.45fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.living-page .column {
+    min-width: 0;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* 1단 + 3단 스크롤바 숨기기 */
+.living-page .column-left,
+.living-page .column-right {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.living-page .column-left::-webkit-scrollbar,
+.living-page .column-right::-webkit-scrollbar {
+    display: none;
+}
+
+.living-page .column-center,
+.living-page .column-right {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ----- 네비게이션 카드 ----- */
+
+.living-page .living-nav-card {
+    padding: 12px;
+}
+
+.living-page .living-nav-card .mini-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 52px;
+    border-radius: 18px;
+    font-weight: 800;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    text-decoration: none;
+    background: #f7dbe2; color: #9a5d6c;
+}
+
+/* ----- 우측 요약 카드 그리드 ----- */
+
+.living-page .side-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.living-page .side-summary-grid .living-mini-card,
+.living-page .side-summary-grid .living-total-card {
+    min-height: 82px;
+    padding: 14px 16px;
+    border: 2px dashed #b8e7d7;
+    border-radius: 22px;
+    box-shadow: none;
+}
+
+.living-page .side-summary-grid .living-mini-card .card-label,
+.living-page .side-summary-grid .living-total-card .card-label {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.3;
+}
+
+.living-page .side-summary-grid .living-mini-card .card-value,
+.living-page .side-summary-grid .living-total-card .card-value {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.2px;
+}
+
+.living-page .side-summary-grid .living-total-card {
+    grid-column: 1 / -1;
+    min-height: 94px;
+    background: #fffdfa;
+}
+
+.living-page .side-summary-grid .living-total-card .card-value {
+    font-size: 21px;
+}
+
+.living-page .side-summary-grid .living-total-card .card-desc {
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.35;
+    color: #9b6a5c;
+}
+
+/* 카드별 톤 */
+.living-page .carry-card .card-label,
+.living-page .carry-card .card-value {
+    color: #d77f75;
+}
+
+.living-page .income-card .card-label,
+.living-page .income-card .card-value {
+    color: #7a62d7;
+}
+
+.living-page .expense-card .card-label,
+.living-page .expense-card .card-value {
+    color: #c96d5a;
+}
+
+.living-page .available-card .card-label,
+.living-page .available-card .card-value {
+    color: #4969d9;
+}
+
+.living-page .emergency-card .card-label,
+.living-page .emergency-card .card-value {
+    color: #b48610;
+}
+
+.living-page .cash-card .card-label,
+.living-page .cash-card .card-value {
+    color: #17956f;
+}
+
+.living-page .living-total-card .card-label,
+.living-page .living-total-card .card-value {
+    color: #cf7f5f;
+}
+
+/* ----- 거래내역 카드 ----- */
+
+.living-page .living-history-card,
+.living-page .living-category-card {
+    border: 2px dashed #b8e7d7;
+    border-radius: 24px;
+}
+
+.living-page .living-history-card h3,
+.living-page .living-category-card h3 {
+    margin-bottom: 18px;
+}
+
+/* 도넛 차트 */
+.donut-chart-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0 20px;
+}
+
+.donut-chart-wrap canvas {
+    max-width: 220px;
+    max-height: 220px;
+}
+
+/* 관리비 막대 차트 */
+.living-page .living-rent-card {
+    border: 2px dashed #b8e7d7;
+    border-radius: 24px;
+}
+
+.living-page .living-rent-card h3 {
+    margin-bottom: 14px;
+}
+
+.rent-chart-wrap {
+    height: 220px;
+}
+
+/* ----- 거래내역 리스트 ----- */
+
+.living-page .living-history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 0;
+    border-bottom: 1px solid #e8efe9;
+}
+
+.living-page .living-history-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.living-page .living-history-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.living-page .living-history-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.living-page .living-history-desc {
+    color: #7a5f58;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+    word-break: break-word;
+    padding-left: 2px;
+}
+
+.living-page .living-history-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 10px;
+    min-width: 165px;
+    flex-shrink: 0;
+}
+
+.living-page .living-history-amount-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.living-page .living-history-amount-wrap strong {
+    line-height: 1.2;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.living-page .living-history-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+.living-page .living-history-actions .mini-btn {
+    width: 56px;
+    min-width: 56px;
+    height: 34px;
+    padding: 0;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    box-sizing: border-box;
+}
+
+/* ----- 금액 색상 ----- */
+
+.living-page .income {
+    color: #4b6bff;
+    font-weight: 800;
+}
+
+.living-page .expense {
+    color: #d87955;
+    font-weight: 800;
+}
+
+.living-page .non-expense {
+    color: #8c6bd8;
+    font-weight: 800;
+}
+
+.living-page .emergency-money {
+    color: #b8860b;
+    font-weight: 900;
+}
+
+.living-page .cash-money {
+    color: #15a57c;
+    font-weight: 900;
+}
+
+/* ----- 태그 색상 ----- */
+
+.living-page .tag-emergency {
+    background: #fff5cf;
+    color: #9a6a00;
+    border: 1px solid #f2db88;
+}
+
+.living-page .tag-cash {
+    background: #e8fff7;
+    color: #00805a;
+    border: 1px solid #bfead9;
+}
+
+/* ----- 좌측 컬럼 스크롤 (패딩 제거) ----- */
+
+.living-page .column-left {
+    padding-right: 0;
+}
+
+/* ----- 반응형 ----- */
+
+@media (max-width: 1200px) {
+    .living-page .dashboard-3col {
+        grid-template-columns: 1fr;
+    }
+
+    .living-page .side-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .living-page .living-history-card {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 700px) {
+    .living-page .side-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .living-page .side-summary-grid .living-total-card {
+        grid-column: auto;
+    }
+
+    .living-page .living-history-top,
+    .living-page .living-history-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .living-page .living-history-amount-wrap strong {
+        font-size: 24px;
+    }
+}
+
+/* =========================
+   메인 페이지 네비게이션 카드
+========================= */
+
+.living-nav-card {
+    padding: 12px;
+}
+
+.living-nav-card .mini-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 52px;
+    border-radius: 18px;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+body:not(.living-page) .living-nav-card .mini-btn {
+    background: #7cc9b1;
+    color: #fff;
+    border: none;
+}
+
+.living-nav-card .mini-btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+}
+
+.living-page .quick-input-card h3 {
+    margin-bottom: 8px;
+}
+
+.living-page .quick-input-sub {
+    margin: 0 0 18px;
+    font-size: 13px;
+    color: #8aa39a;
+    line-height: 1.4;
+}
+
+.living-page .quick-input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.living-page .quick-input-btn {
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid #bfded3;
+    background: #fff;
+    color: #2f6f60;
+    font-weight: 700;
+    font-size: 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    text-align: center;
+    padding: 0 14px;
+    line-height: 1;
+}
+
+.living-page .quick-input-btn:hover {
+    background: #f3fbf7;
+    border-color: #9fd3c0;
+    transform: translateY(-1px);
+    box-shadow: none;
+}
+
+/* =====================================
+   생활비 카테고리 모달 리뉴얼
+===================================== */
+
+.living-page .modal-content-wide {
+    width: 520px;
+    max-width: 92vw;
+    max-height: 72vh;
+    padding: 24px 24px 18px;
+    overflow-y: auto;
+}
+
+.living-page .category-modal-body {
+    margin-top: 14px;
+    margin-bottom: 10px;
+    gap: 0;
+}
+
+.living-page .modal-history-row.compact-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 2px;
+    border-bottom: 1px dashed #dcebe5;
+}
+
+.living-page .compact-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.living-page .compact-left .history-date {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #f4f1f1;
+    color: #8f8085;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.living-page .history-desc-inline {
+    color: #5f5a56;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.living-page .compact-right {
+    flex-shrink: 0;
+}
+
+.living-page .compact-right .expense {
+    font-size: 17px;
+    font-weight: 800;
+    color: #d97b58;
+}
+
+.living-page .modal-btn-row {
+    margin-top: 16px;
+}
+
+.living-page .modal-history-row:hover{
+    background:#f7fbf9;
+    border-radius:12px;
+}
+
+/* =====================================
+   생활비 페이지 버튼 컬러 통일
+   CSS 맨 아래 추가
+===================================== */
+
+/* 수정 버튼 */
+.living-page .mini-btn:not(.danger),
+.living-page a.mini-btn:not(.danger),
+.living-page button.mini-btn:not(.danger) {
+    background: #edf7f3 !important;
+    color: #3f7567 !important;
+    border: 1px solid #cfe7de !important;
+    box-shadow: none !important;
+}
+
+/* 수정 버튼 hover */
+.living-page .mini-btn:not(.danger):hover,
+.living-page a.mini-btn:not(.danger):hover,
+.living-page button.mini-btn:not(.danger):hover {
+    background: #dff1ea !important;
+    color: #2f6f60 !important;
+    transform: translateY(-1px);
+}
+
+/* 삭제 버튼 */
+.living-page .mini-btn.danger,
+.living-page a.mini-btn.danger,
+.living-page button.mini-btn.danger {
+    background: #fff1ee !important;
+    color: #d87955 !important;
+    border: 1px solid #ffd7ca !important;
+    box-shadow: none !important;
+}
+
+/* 삭제 버튼 hover */
+.living-page .mini-btn.danger:hover,
+.living-page a.mini-btn.danger:hover,
+.living-page button.mini-btn.danger:hover {
+    background: #ffe5dd !important;
+    color: #c96a47 !important;
+    transform: translateY(-1px);
+}
+
+/* 버튼 크기 정리 */
+.living-page .living-history-actions .mini-btn {
+    min-width: 58px;
+    height: 34px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 0;
+}
+
+/* =====================================
+   생활비 페이지 카테고리 총지출 태그 전용
+   CSS 맨 아래 추가
+===================================== */
+
+/* 공통 */
+.living-page .living-category-card .tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    border: 1px solid transparent;
+    gap: 6px;
+}
+
+/* 주거비 */
+.living-page .living-category-card .tag:has-text("주거비") {}
+
+/* 주거비 (첫번째 줄 대응용) */
+.living-page .living-category-card .category-summary-row[data-category="주거비"] .tag {
+    background: #eef8f4 !important;
+    color: #2f6f60 !important;
+    border-color: #cfe7de !important;
+}
+
+/* 식비 */
+.living-page .living-category-card .category-summary-row[data-category="식비"] .tag {
+    background: #fff5ee !important;
+    color: #d87955 !important;
+    border-color: #ffd8c8 !important;
+}
+
+/* 생활용품 */
+.living-page .living-category-card .category-summary-row[data-category="생활용품"] .tag {
+    background: #f2f6ff !important;
+    color: #5a72d8 !important;
+    border-color: #d8e2ff !important;
+}
+
+/* 교통 */
+.living-page .living-category-card .category-summary-row[data-category="교통"] .tag {
+    background: #f8f3ff !important;
+    color: #7a63c9 !important;
+    border-color: #e5dbff !important;
+}
+
+/* 의료 */
+.living-page .living-category-card .category-summary-row[data-category="의료"] .tag {
+    background: #fff0f3 !important;
+    color: #d85f7d !important;
+    border-color: #ffd5de !important;
+}
+
+/* 문화 */
+.living-page .living-category-card .category-summary-row[data-category="문화"] .tag,
+.living-page .living-category-card .category-summary-row[data-category="여가"] .tag {
+    background: #fffbe8 !important;
+    color: #a67c00 !important;
+    border-color: #f2e2a0 !important;
+}
+
+/* 기타 */
+.living-page .living-category-card .category-summary-row[data-category="기타"] .tag {
+    background: #f5f5f5 !important;
+    color: #666 !important;
+    border-color: #e0e0e0 !important;
 }

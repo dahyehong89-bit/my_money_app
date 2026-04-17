@@ -4,7 +4,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>소중한 내 지갑</title>
+    <title>소중한 내 지갑 | 🌷 가계부</title>
     <link rel="stylesheet" href="{% static 'account/css/style.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -44,8 +44,6 @@
                             <option value="cash_transfer">💵 현금/이체</option>
                         </select>
 
-                        <input type="text" name="description" id="ui_desc" placeholder="내역 입력" required>
-
                         <select name="category" id="ui_category">
                             <option value="expense">지출</option>
                             <option value="income">입금</option>
@@ -57,6 +55,8 @@
                             <option value="{{ value }}">{{ label }}</option>
                             {% endfor %}
                         </select>
+
+                        <input type="text" name="description" id="ui_desc" placeholder="내역 입력">
 
                         <input type="number" name="amount" id="ui_amount" placeholder="금액" required>
 
@@ -73,31 +73,66 @@
                     </form>
                 </div>
                 <div class="summary-card">
-                    <h3>📌 신한카드 고정비</h3>
+                    <h3>⚡ 신한카드 빠른입력</h3>
 
                     <div class="fixed-grid">
-                        <button type="button" class="quick-fixed-btn"
-                                onclick="openFixedModal('통신비', '통신비', 103490, false, '')">
+                        <button type="button"
+                                class="quick-fixed-btn"
+                                onclick="applyQuickExpense(
+                                    'shinhan',
+                                    'expense',
+                                    '통신비',
+                                    '통신비',
+                                    103490
+                                )">
                             📱 통신비
                         </button>
 
-                        <button type="button" class="quick-fixed-btn"
-                                onclick="openFixedModal('인터넷', '인터넷', 26400, false, '')">
+                        <button type="button"
+                                class="quick-fixed-btn"
+                                onclick="applyQuickExpense(
+                                    'shinhan',
+                                    'expense',
+                                    '통신비',
+                                    '인터넷',
+                                    26400
+                                )">
                             🌐 인터넷
                         </button>
 
-                        <button type="button" class="quick-fixed-btn"
-                                onclick="openFixedModal('쿠팡와우', '쿠팡와우', 7890, false, '')">
+                        <button type="button"
+                                class="quick-fixed-btn"
+                                onclick="applyQuickExpense(
+                                    'shinhan',
+                                    'expense',
+                                    '구독',
+                                    '쿠팡와우',
+                                    7890
+                                )">
                             📦 쿠팡와우
                         </button>
 
-                        <button type="button" class="quick-fixed-btn"
-                                onclick="openFixedModal('이모티콘', '이모티콘', 3900, false, '')">
+                        <button type="button"
+                                class="quick-fixed-btn"
+                                onclick="applyQuickExpense(
+                                    'shinhan',
+                                    'expense',
+                                    '구독',
+                                    '이모티콘',
+                                    3900
+                                )">
                             💬 이모티콘
                         </button>
 
-                        <button type="button" class="quick-fixed-btn"
-                                onclick="openFixedModal('주유', '주유', 60000, true, 1940)">
+                        <button type="button"
+                                class="quick-fixed-btn"
+                                onclick="applyQuickExpense(
+                                    'shinhan',
+                                    'expense',
+                                    '주유',
+                                    '주유',
+                                    60000
+                                )">
                             ⛽ 주유
                         </button>
                     </div>
@@ -148,7 +183,19 @@
                             ">
                                 {{ item.amount|intcomma }}원
                             </strong>
-                            <a href="{% url 'edit_transaction' item.pk %}" class="mini-btn">수정</a>
+                            <button type="button"
+                                    class="mini-btn main-edit-btn"
+                                    data-pk="{{ item.pk }}"
+                                    data-date="{{ item.date|date:'Y-m-d' }}"
+                                    data-account="{{ item.account_type }}"
+                                    data-category="{{ item.category }}"
+                                    data-detail="{{ item.detail_category }}"
+                                    data-description="{{ item.description|default_if_none:''|escape }}"
+                                    data-amount="{{ item.amount }}"
+                                    data-is-fuel="{{ item.is_fuel|yesno:'true,false' }}"
+                                    data-price="{{ item.price_per_liter|default_if_none:'' }}">
+                                수정
+                            </button>
                             <a href="{% url 'delete_transaction' item.pk %}" class="mini-btn danger" onclick="return confirm('삭제할까요?');">삭제</a>
                         </div>
                     </div>
@@ -160,6 +207,9 @@
 
             <!-- 3단 -->
             <section class="column column-right">
+                <div class="summary-card living-nav-card">
+                    <a href="{% url 'living' %}" class="mini-btn">🏠 생활비 통장</a>
+                </div>
                 <div class="summary-card budget-card">
                     <h3>💳 현대카드 예산</h3>
                     <p class="big-amount">{{ stats.hyundai|intcomma }}원 사용</p>
@@ -464,63 +514,76 @@
         </div>
     </div>
 
-    <div id="fixedModal" class="fixed-modal-overlay" style="display:none;">
-        <div class="fixed-modal">
-            <div class="fixed-modal-header">
-                <h3 id="fixedModalTitle">고정비 입력</h3>
-                <button type="button" class="modal-close-btn" onclick="closeFixedModal()">✕</button>
-            </div>
+    <div id="mainEditModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content modal-content-wide">
+            <h3>✏️ 가계부 내역 수정</h3>
 
-            <div class="fixed-modal-body">
-                <div class="modal-field">
-                    <label for="fixed_date">날짜</label>
-                    <input type="date" id="fixed_date">
+            <form method="POST" action="{% url 'index' %}">
+                {% csrf_token %}
+                <input type="hidden" name="edit_pk" id="main_edit_pk">
+
+                <div class="modal-body modal-body-grid">
+                    <div>
+                        <label for="main_edit_date">날짜</label>
+                        <input type="date" name="date" id="main_edit_date" class="modal-input" required>
+                    </div>
+
+                    <div>
+                        <label for="main_edit_account">계좌</label>
+                        <select name="account_type" id="main_edit_account" class="modal-input" required>
+                            <option value="hyundai">현대카드(용돈)</option>
+                            <option value="shinhan">신한카드(고정비)</option>
+                            <option value="incident">사건비통장</option>
+                            <option value="cash_transfer">현금/이체</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="main_edit_category">구분</label>
+                        <select name="category" id="main_edit_category" class="modal-input" required>
+                            <option value="expense">지출</option>
+                            <option value="income">입금</option>
+                            <option value="non_expense">비지출/이동</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="main_edit_detail">카테고리</label>
+                        <select name="detail_category" id="main_edit_detail" class="modal-input" required>
+                            {% for label, value in detail_category_options %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="main_edit_desc">내역</label>
+                        <input type="text" name="description" id="main_edit_desc" class="modal-input">
+                    </div>
+
+                    <div>
+                        <label for="main_edit_amount">금액</label>
+                        <input type="number" name="amount" id="main_edit_amount" class="modal-input" required>
+                    </div>
+
+                    <div>
+                        <label class="fuel-check">
+                            <input type="checkbox" name="is_fuel" id="main_edit_is_fuel">
+                            주유 항목
+                        </label>
+                    </div>
+
+                    <div id="main_edit_fuel_wrap" style="display:none;">
+                        <label for="main_edit_price">리터당 단가</label>
+                        <input type="number" name="price_per_liter" id="main_edit_price" class="modal-input">
+                    </div>
                 </div>
 
-                <div class="modal-field">
-                    <label for="fixed_desc">사용처/메모</label>
-                    <input type="text" id="fixed_desc">
+                <div class="modal-btn-row">
+                    <button type="button" class="modal-btn-cancel" onclick="closeModal('mainEditModal')">취소</button>
+                    <button type="submit" class="modal-btn-confirm">수정 저장</button>
                 </div>
-
-                <div class="modal-field">
-                    <label for="fixed_amount">금액</label>
-                    <input type="number" id="fixed_amount">
-                </div>
-
-                <div class="modal-field" id="fixed_category_wrap" style="display:none;">
-                    <label for="fixed_category">분류</label>
-                    <select id="fixed_category">
-                        <option value="expense">지출</option>
-                        <option value="non_expense">비지출</option>
-                    </select>
-                </div>
-
-                <div class="modal-field" id="fixed_detail_wrap">
-                    <label for="fixed_detail_category">세부 카테고리</label>
-                    <select id="fixed_detail_category">
-                        <option value="통신비">통신비</option>
-                        <option value="구독">구독</option>
-                        <option value="주유">주유</option>
-                    </select>
-                </div>
-
-                <div class="modal-field">
-                    <label class="fuel-check">
-                        <input type="checkbox" id="fixed_is_fuel" onchange="toggleFuelFields()">
-                        주유 항목
-                    </label>
-                </div>
-
-                <div class="modal-field" id="fixed_price_wrap" style="display:none;">
-                    <label for="fixed_price_per_liter">리터당 단가</label>
-                    <input type="number" id="fixed_price_per_liter">
-                </div>
-            </div>
-
-            <div class="fixed-modal-actions">
-                <button type="button" class="mini-btn" onclick="closeFixedModal()">취소</button>
-                <button type="button" class="mini-btn" onclick="applyFixedModal()">입력하기</button>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -528,6 +591,6 @@
     <script id="fuel_prices_data" type="application/json">{{ fuel_prices|safe }}</script>
     {{ category_detail_map|json_script:"category-detail-data" }}
 
-    <script src="{% static 'account/js/script.js' %}?v=3"></script>
+    <script src="{% static 'account/js/script.js' %}?v=5"></script>
 </body>
 </html>

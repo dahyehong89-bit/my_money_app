@@ -1,0 +1,430 @@
+{% load static %}
+{% load humanize ledger_extras %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>소중한 내 지갑 | 🏠 생활비 통장</title>
+    <link rel="stylesheet" href="{% static 'account/css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="living-page">
+    <div class="main-wrapper">
+        <div class="dashboard-3col">
+
+            <!-- 1단 -->
+            <section class="column column-left">
+                <div class="page-title-wrap">
+                    <h2 class="page-title">🏠 {{ selected_year }}년 {{ selected_month_num }}월 생활비 통장</h2>
+                </div>
+                <form method="get" class="month-filter-wrap">
+                    <label for="month_picker">📅 월 선택</label>
+                    <div class="month-filter-row">
+                        <label for="month_picker" class="date-wrap">
+                            <input type="month" id="month_picker" name="month" value="{{ selected_month }}">
+                        </label>
+                        <button type="submit" class="mini-btn month-btn">조회</button>
+                    </div>
+                </form>
+
+                <div class="summary-card">
+                    <h3>✍️ 오늘 기록하기</h3>
+
+                    <form id="main_form" method="POST" action="{% url 'living' %}">
+                        {% csrf_token %}
+
+                        <label for="ui_date" class="date-wrap">
+                            <input type="date" name="date" id="ui_date" required value="{{ today|date:'Y-m-d' }}">
+                        </label>
+
+                        <input type="hidden" name="account_type" value="living">
+                        <div class="living-account-badge">🏠 생활비 통장</div>
+
+                        <select name="category" id="living-category-select" required>
+                            <option value="expense">지출</option>
+                            <option value="income">입금</option>                            
+                            <option value="emergency">비상금</option>
+                            <option value="cash">현금</option>
+                        </select>
+
+                        <select name="detail_category" id="ui_detail_category" required></select>
+
+                        <input type="text" name="description" id="ui_desc" placeholder="내역 입력">
+
+                        <input type="number" name="amount" id="ui_amount" placeholder="금액" required>
+
+                        <div id="ui_fuel_section" style="display:none;">
+                            <input type="number" name="price_per_liter" id="ui_fuel_price" placeholder="리터당 단가">
+                        </div>
+
+                        <button type="submit" class="submit-btn">✅ 저장</button>
+                    </form>
+                </div>
+                <div class="summary-card quick-input-card">
+                    <h3>⚡ 빠른 입력</h3>
+                    <p class="quick-input-sub">자주 쓰는 수입/비상금 항목을 빠르게 입력</p>
+
+                    <div class="quick-input-grid">
+                        <button type="button"
+                                class="quick-input-btn"
+                                onclick="applyLivingQuickInput('income','정기입금','-',1000000)">
+                            <span class="quick-icon">💙</span>
+                            <span class="quick-label">정기입금</span>
+                        </button>
+
+                        <button type="button"
+                                class="quick-input-btn"
+                                onclick="applyLivingQuickInput('income','추가수입','-','')">
+                            <span class="quick-icon">💜</span>
+                            <span class="quick-label">추가수입</span>
+                        </button>
+
+                        <button type="button"
+                                class="quick-input-btn"
+                                onclick="applyLivingQuickInput('emergency','비상금 넣기','-','')">
+                            <span class="quick-icon">💛</span>
+                            <span class="quick-label">비상금 넣기</span>
+                        </button>
+
+                        <button type="button"
+                                class="quick-input-btn"
+                                onclick="applyLivingQuickInput('emergency','비상금 빼기','-','')">
+                            <span class="quick-icon">🧡</span>
+                            <span class="quick-label">비상금 빼기</span>
+                        </button>
+
+                        <button type="button"
+                                class="quick-input-btn"
+                                onclick="applyLivingQuickInput('cash','현금 넣기','-','')">
+                            <span class="quick-icon">💚</span>
+                            <span class="quick-label">현금 넣기</span>
+                        </button>
+
+                        <button type="button"
+                                class="quick-input-btn"
+                                onclick="applyLivingQuickInput('cash','현금 쓰기','-','')">
+                            <span class="quick-icon">❤️</span>
+                            <span class="quick-label">현금 쓰기</span>
+                        </button>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2단 -->
+            <section class="column column-center">
+                <div class="summary-card living-history-card">
+                    <h3>📂 전체 거래 내역</h3>
+
+                    {% for item in history %}
+                    <div class="living-history-item">
+                        <div class="living-history-left">
+                            <div class="living-history-meta">
+                                <span class="history-date-pill">{{ item.date|date:"m/d" }}</span>
+
+                                <span class="tag
+                                    {% if item.category == 'income' %}
+                                        tag-income
+                                    {% elif item.category == 'expense' %}
+                                        tag-expense
+                                    {% elif item.detail_category|slice:':3' == '비상금' %}
+                                        tag-emergency
+                                    {% elif item.detail_category|slice:':2' == '현금' %}
+                                        tag-cash
+                                    {% endif %}
+                                ">
+                                    {% if item.category == 'income' %}
+                                        입금
+                                    {% elif item.category == 'expense' %}
+                                        지출
+                                    {% elif item.detail_category|slice:':3' == '비상금' %}
+                                        비상금
+                                    {% elif item.detail_category|slice:':2' == '현금' %}
+                                        현금
+                                    {% endif %}
+                                </span>
+
+                                <span class="tag tag-detail
+                                    {% if item.detail_category|slice:':3' == '비상금' %}
+                                        tag-emergency
+                                    {% elif item.detail_category|slice:':2' == '현금' %}
+                                        tag-cash
+                                    {% elif item.category == 'income' %}
+                                        tag-income-soft
+                                    {% elif item.category == 'expense' %}
+                                        tag-expense-soft
+                                    {% endif %}
+                                ">
+                                    {{ item.detail_category }}
+                                </span>
+                            </div>
+
+                            <div class="living-history-desc">
+                                {{ item.description|default:"-" }}
+                            </div>
+                        </div>
+
+                        <div class="living-history-right">
+                            <div class="living-history-amount-wrap">
+                                <strong class="
+                                    {% if item.category == 'income' %}
+                                        income
+                                    {% elif item.category == 'non_expense' and item.detail_category == '비상금' %}
+                                        emergency-money
+                                    {% elif item.category == 'non_expense' and item.detail_category == '현금' %}
+                                        cash-money
+                                    {% else %}
+                                        expense
+                                    {% endif %}
+                                ">
+                                    {{ item.amount|intcomma }}원
+                                </strong>
+                            </div>
+
+                            <div class="living-history-actions">
+                                <button type="button"
+                                        class="mini-btn living-edit-btn"
+                                        data-pk="{{ item.pk }}"
+                                        data-date="{{ item.date|date:'Y-m-d' }}"
+                                        data-category="{{ item.category }}"
+                                        data-detail="{{ item.detail_category }}"
+                                        data-description="{{ item.description|default_if_none:'' }}"
+                                        data-amount="{{ item.amount }}">
+                                    수정
+                                </button>
+
+                                <a href="{% url 'delete_transaction' item.pk %}"
+                                class="mini-btn danger"
+                                onclick="return confirm('삭제할까요?');">
+                                    삭제
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="empty-text">거래 내역이 없습니다.</p>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- 3단 -->
+            <section class="column column-right">
+                <div class="summary-card living-nav-card">
+                    <a href="{% url 'index' %}" class="mini-btn">🌷 메인 가계부</a>
+                </div>
+
+                <div class="living-summary-grid side-summary-grid">
+                    <div class="summary-card living-mini-card carry-card">
+                        <div class="card-label">🔄 이월금액</div>
+                        <div class="card-value">{{ carry_over|intcomma }}원</div>
+                    </div>
+
+                    <div class="summary-card living-mini-card income-card">
+                        <div class="card-label">➕ 입금</div>
+                        <div class="card-value">{{ living_income|intcomma }}원</div>
+                    </div>
+
+                    <div class="summary-card living-mini-card expense-card">
+                        <div class="card-label">💸 지출</div>
+                        <div class="card-value">{{ living_expense|intcomma }}원</div>
+                    </div>
+
+                    <div class="summary-card living-mini-card available-card">
+                        <div class="card-label">💳 가용생활비</div>
+                        <div class="card-value">{{ available_living|intcomma }}원</div>
+                    </div>
+
+                    <div class="summary-card living-mini-card emergency-card">
+                        <div class="card-label">🏦 비상금</div>
+                        <div class="card-value">{{ emergency_total|intcomma }}원</div>
+                    </div>
+
+                    <div class="summary-card living-mini-card cash-card">
+                        <div class="card-label">💵 현금보유액</div>
+                        <div class="card-value">{{ cash_total|intcomma }}원</div>
+                    </div>
+
+                    <div class="summary-card living-total-card">
+                        <div class="card-label">💰 총 보유 생활비</div>
+                        <div class="card-value">{{ total_living_assets|intcomma }}원</div>
+                        <div class="card-desc">가용생활비 + 비상금 + 현금보유액</div>
+                    </div>
+                </div>
+
+                <div class="summary-card living-category-card">
+                    <h3>📊 카테고리 총 지출</h3>
+
+                    {% if category_summary_list %}
+                    <div class="donut-chart-wrap">
+                        <canvas id="livingDonutChart"></canvas>
+                    </div>
+                    {% endif %}
+
+                    {% for item in category_summary_list %}
+                    <div class="history-row category-summary-row"
+                        data-category="{{ item.name }}"
+                        onclick="openCategoryModal(this.dataset.category)">
+                        <div class="history-left">
+                            <span class="tag">{{ item.icon }} {{ item.name }}</span>
+                        </div>
+                        <div>
+                            <strong class="expense">{{ item.total|intcomma }}원</strong>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="empty-text">지출 내역이 없습니다.</p>
+                    {% endfor %}
+                </div>
+
+                <div class="summary-card living-rent-card">
+                    <h3>🏠 관리비 1년 추이</h3>
+                    <div class="rent-chart-wrap">
+                        <canvas id="livingRentChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- 기록 확인 모달 -->
+    <div id="confirmModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <h3>기록 확인 및 수정 ✨</h3>
+
+            <form id="modal_form" method="POST" action="{% url 'living' %}">
+                {% csrf_token %}
+
+                <div class="modal-body">
+                    <div>
+                        <label>날짜</label>
+                        <input type="date" name="date" id="modal_date" class="modal-input" required>
+                    </div>
+
+                    <div>
+                        <label>내역</label>
+                        <input type="text" name="description" id="modal_desc" class="modal-input" required>
+                    </div>
+
+                    <div>
+                        <label>금액</label>
+                        <input type="number" name="amount" id="modal_amount" class="modal-input" required oninput="calcLiterInModal()">
+                    </div>
+
+                    <div class="modal-grid-2">
+                        <div>
+                            <input type="hidden" name="account_type" value="living">
+                            <div class="living-account-badge">🏠 생활비 통장</div>
+                        </div>
+
+                        <div>
+                            <label for="modal_category">분류</label>
+                            <select name="category" id="modal_category" class="modal-input">
+                                <option value="income">입금</option>
+                                <option value="expense">지출</option>
+                                <option value="emergency">비상금</option>
+                                <option value="cash">현금</option>
+                            </select>
+
+                            <select name="detail_category" id="modal_detail_category" class="modal-input" required></select>
+                        </div>
+                    </div>
+
+                    <div id="modal_fuel_section" class="fuel-info-box" style="display:none;">
+                        <label>⛽ 주유 정보</label>
+                        <input type="hidden" name="is_fuel" id="modal_is_fuel">
+                        <input type="number" name="price_per_liter" id="modal_fuel_price" placeholder="리터당 단가" class="modal-input" oninput="calcLiterInModal()">
+                        <p id="modal_calc_result"></p>
+                    </div>
+                </div>
+
+                <div class="modal-btn-row">                    
+                    <button type="button" onclick="closeModal('confirmModal')" class="modal-btn-cancel">취소</button>
+                    <button type="submit" class="modal-btn-confirm">이대로 저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="livingEditModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <h3>✏️ 생활비 내역 수정</h3>
+
+            <form id="living_edit_form" method="POST">
+                {% csrf_token %}
+
+                <input type="hidden" name="edit_pk" id="edit_pk">
+
+                <div class="modal-body">
+                    <div>
+                        <label for="edit_date">날짜</label>
+                        <input type="date" name="date" id="edit_date" class="modal-input" required>
+                    </div>
+
+                    <div>
+                        <label for="edit_category">구분</label>
+                        <select name="category" id="edit_category" class="modal-input" required>
+                            <option value="income">입금</option>
+                            <option value="expense">지출</option>
+                            <option value="emergency">비상금</option>
+                            <option value="cash">현금</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="edit_detail_category">카테고리</label>
+                        <select name="detail_category" id="edit_detail_category" class="modal-input" required></select>
+                    </div>
+
+                    <div>
+                        <label for="edit_description">내역</label>
+                        <input type="text" name="description" id="edit_description" class="modal-input">
+                    </div>
+
+                    <div>
+                        <label for="edit_amount">금액</label>
+                        <input type="number" name="amount" id="edit_amount" class="modal-input" required>
+                    </div>
+                </div>
+
+                <div class="modal-btn-row">
+                    <button type="button" onclick="closeModal('livingEditModal')" class="modal-btn-cancel">취소</button>
+                    <button type="submit" class="modal-btn-confirm">수정 저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="categoryModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content modal-content-wide">
+            <h3 id="categoryModalTitle">카테고리 세부내역</h3>
+
+            <div id="categoryModalBody" class="category-modal-body">
+                <p class="empty-text">내역이 없습니다.</p>
+            </div>
+
+            <div class="modal-btn-row">
+                <button type="button"
+                        class="modal-btn-cancel"
+                        onclick="closeCategoryModal()">
+                    닫기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script id="fuel_labels_data" type="application/json">{{ fuel_labels|safe }}</script>
+    <script id="fuel_prices_data" type="application/json">{{ fuel_prices|safe }}</script>
+
+    {{ category_detail_map|json_script:"category-detail-data" }}
+
+    {{ living_category_map_json|json_script:"living-category-map-data" }}
+
+    {{ chart_labels_json|json_script:"living-chart-labels" }}
+    {{ chart_values_json|json_script:"living-chart-values" }}
+
+    {{ rent_chart_labels_json|json_script:"living-rent-labels" }}
+    {{ rent_chart_values_json|json_script:"living-rent-values" }}
+
+    <script src="{% static 'account/js/script.js' %}?v=6"></script>
+</body>
+</html>

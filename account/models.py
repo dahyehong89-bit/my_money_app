@@ -1,31 +1,8 @@
 from django.db import models
+from .category_config import ACCOUNT_CHOICES, TYPE_CHOICES, DETAIL_CATEGORY_CHOICES
 
 
 class Transaction(models.Model):
-    ACCOUNT_CHOICES = [
-        ('hyundai', '현대카드(용돈)'),
-        ('shinhan', '신한카드(고정비)'),
-        ('incident', '사건비통장'),
-        ('cash_transfer', '현금/이체'),
-    ]
-
-    TYPE_CHOICES = [
-        ('expense', '지출'),
-        ('income', '환급/입금'),
-        ('non_expense', '비지출(지원)'),
-    ]
-
-    DETAIL_CATEGORY_CHOICES = [
-        ('외식', '외식'),
-        ('커피', '커피'),
-        ('주유', '주유'),
-        ('쇼핑', '쇼핑'),
-        ('병원', '병원'),
-        ('고정비', '고정비'),
-        ('생활', '생활'),
-        ('기타', '기타'),
-    ]
-
     date = models.DateField()
     description = models.CharField(max_length=100)
     amount = models.IntegerField()

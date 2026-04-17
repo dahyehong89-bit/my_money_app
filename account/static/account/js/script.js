@@ -22,38 +22,50 @@ function toggleFuelInput() {
     }
 }
 
-// 2. 고정비 퀵버튼 (클릭 시 값을 모달에 채우고 오픈)
-function quickSave(label, amount, account) {
-    const today = new Date().toISOString().substring(0, 10);
+// 2. 고정비 퀵버튼
+function applyQuickExpense(account, category, detailCategory, description, amount = "") {
+    const dateInput = document.getElementById("ui_date");
+    const accountInput = document.getElementById("ui_account");
+    const categoryInput = document.getElementById("ui_category");
+    const detailInput = document.getElementById("ui_detail_category");
+    const descInput = document.getElementById("ui_desc");
+    const amountInput = document.getElementById("ui_amount");
+    const fuelCheck = document.getElementById("ui_is_fuel");
+    const fuelSection = document.getElementById("ui_fuel_section");
+    const fuelPrice = document.getElementById("ui_fuel_price");
 
-    const modalDate = document.getElementById('modal_date');
-    const modalDesc = document.getElementById('modal_desc');
-    const modalAmount = document.getElementById('modal_amount');
-    const modalAccount = document.getElementById('modal_account');
-    const modalCategory = document.getElementById('modal_category');
-    const fuelSection = document.getElementById('modal_fuel_section');
-    const isFuelInput = document.getElementById('modal_is_fuel');
-    const confirmModal = document.getElementById('confirmModal');
-
-    if (modalDate) modalDate.value = today;
-    if (modalDesc) modalDesc.value = label;
-    if (modalAmount) modalAmount.value = amount;
-    if (modalAccount) modalAccount.value = account;
-    if (modalCategory) modalCategory.value = 'expense';
-
-    if (label.includes('주유')) {
-        if (fuelSection) fuelSection.style.display = 'block';
-        if (isFuelInput) isFuelInput.value = 'on';
-    } else {
-        if (fuelSection) fuelSection.style.display = 'none';
-        if (isFuelInput) isFuelInput.value = 'off';
-
-        const modalFuelPrice = document.getElementById('modal_fuel_price');
-        if (modalFuelPrice) modalFuelPrice.value = '';
+    if (!accountInput || !categoryInput || !detailInput || !descInput || !amountInput) {
+        console.log("빠른입력 대상 input id를 찾지 못함");
+        return;
     }
 
-    if (confirmModal) confirmModal.style.display = 'flex';
-    calcLiterInModal();
+    if (dateInput && !dateInput.value) {
+        dateInput.value = getTodayDate();
+    }
+
+    accountInput.value = account;
+    categoryInput.value = category;
+    detailInput.value = detailCategory;
+    descInput.value = description;
+    amountInput.value = amount;
+
+    // 주유일 때만 연료칸 표시
+    const isFuel = detailCategory === "주유";
+
+    if (fuelCheck) {
+        fuelCheck.checked = isFuel;
+    }
+
+    if (fuelSection) {
+        fuelSection.style.display = isFuel ? "block" : "none";
+    }
+
+    if (!isFuel && fuelPrice) {
+        fuelPrice.value = "";
+    }
+
+    amountInput.focus();
+    amountInput.select();
 }
 
 // 3. 기록하기 버튼 (메인 폼 -> 모달 폼으로 복사 후 오픈)
@@ -175,6 +187,11 @@ function openCategoryModal(category) {
     const title = document.getElementById('categoryModalTitle');
     const body = document.getElementById('categoryModalBody');
 
+    if (!modal || !title || !body) {
+        console.log('categoryModal 요소를 찾지 못함');
+        return;
+    }
+
     const items = categoryDetailMap[category] || [];
 
     title.textContent = category + ' 세부내역';
@@ -183,14 +200,16 @@ function openCategoryModal(category) {
         body.innerHTML = '<p class="empty-text">내역이 없습니다.</p>';
     } else {
         body.innerHTML = items.map(item => `
-            <div class="modal-history-row">
-                <div class="modal-history-left">
+            <div class="modal-history-row compact-row">
+                <div class="modal-history-left compact-left">
                     <span class="history-date">${item.date}</span>
-                    <span class="tag">${item.account_type}</span>
-                    <span>${item.description || ''}</span>
+                    <span class="history-desc-inline">${item.description || '-'}</span>
                 </div>
-                <div>
-                    <strong class="expense">${Number(item.amount).toLocaleString()}원</strong>
+
+                <div class="compact-right">
+                    <strong class="expense">
+                        ${Number(item.amount).toLocaleString()}원
+                    </strong>
                 </div>
             </div>
         `).join('');
@@ -200,7 +219,10 @@ function openCategoryModal(category) {
 }
 
 function closeCategoryModal() {
-    document.getElementById('categoryModal').style.display = 'none';
+    const modal = document.getElementById('categoryModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 window.addEventListener('click', function(e) {
@@ -358,3 +380,395 @@ function applyFixedModal() {
     closeFixedModal();
     document.getElementById("main_form").submit();
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    // LIVING_CATEGORY_MAP은 living.html의 <script> 태그에서 전역으로 주입됨
+    // 메인 페이지(index.html)에서는 주입되지 않으므로, 없으면 빈 객체로 처리
+
+    const categoryMap = (typeof LIVING_CATEGORY_MAP !== "undefined") ? LIVING_CATEGORY_MAP : {};
+
+    window.updateLivingDetailOptions = function (groupId, detailId, selectedValue = null) {
+        const groupSelect = document.getElementById(groupId);
+        const detailSelect = document.getElementById(detailId);
+
+        if (!groupSelect || !detailSelect) return;
+
+        const groupValue = groupSelect.value;
+        const options = categoryMap[groupValue] || [];
+
+        detailSelect.innerHTML = "";
+
+        options.forEach((item) => {
+            const option = document.createElement("option");
+            option.value = item.value;
+            option.textContent = item.label;
+
+            if (selectedValue && selectedValue === item.value) {
+                option.selected = true;
+            }
+
+            detailSelect.appendChild(option);
+        });
+    };
+
+    function bindLivingCategory(groupId, detailId) {
+        const groupSelect = document.getElementById(groupId);
+        if (!groupSelect) return;
+
+        groupSelect.addEventListener("change", function () {
+            updateLivingDetailOptions(groupId, detailId);
+        });
+
+        updateLivingDetailOptions(groupId, detailId);
+    }
+
+    bindLivingCategory("living-category-select", "ui_detail_category");
+    bindLivingCategory("modal_category", "modal_detail_category");
+});
+
+// 수정 모달도 동일한 LIVING_CATEGORY_MAP 사용
+function updateLivingEditDetailOptions(category, selectedValue = "") {
+    const select = document.getElementById("edit_detail_category");
+    if (!select) return;
+
+    const categoryMap = (typeof LIVING_CATEGORY_MAP !== "undefined") ? LIVING_CATEGORY_MAP : {};
+    const options = categoryMap[category] || [];
+
+    select.innerHTML = "";
+
+    options.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item.value;
+        option.textContent = item.label;
+
+        if (item.value === selectedValue) {
+            option.selected = true;
+        }
+
+        select.appendChild(option);
+    });
+}
+
+function openLivingEditModal(pk, date, category, detailCategory, description, amount) {
+    const modal = document.getElementById("livingEditModal");
+    if (!modal) return;
+
+    document.getElementById("edit_pk").value = pk;
+    document.getElementById("edit_date").value = date;
+    document.getElementById("edit_description").value = description || "";
+    document.getElementById("edit_amount").value = Math.abs(Number(amount));
+
+    let uiCategory = category;
+
+    if ((detailCategory || "").startsWith("비상금")) {
+        uiCategory = "emergency";
+    } else if ((detailCategory || "").startsWith("현금")) {
+        uiCategory = "cash";
+    }
+
+    document.getElementById("edit_category").value = uiCategory;
+    updateLivingEditDetailOptions(uiCategory, detailCategory);
+
+    modal.style.display = "flex";
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".living-edit-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+            openLivingEditModal(
+                this.dataset.pk,
+                this.dataset.date,
+                this.dataset.category,
+                this.dataset.detail,
+                this.dataset.description,
+                this.dataset.amount
+            );
+        });
+    });
+
+    // 메인 가계부 수정 모달
+    document.querySelectorAll(".main-edit-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+            openMainEditModal(
+                this.dataset.pk,
+                this.dataset.date,
+                this.dataset.account,
+                this.dataset.category,
+                this.dataset.detail,
+                this.dataset.description,
+                this.dataset.amount,
+                this.dataset.isFuel === "true",
+                this.dataset.price
+            );
+        });
+    });
+});
+
+// 메인 가계부 수정 모달 열기
+function openMainEditModal(pk, date, account, category, detail, description, amount, isFuel, price) {
+    const modal = document.getElementById("mainEditModal");
+    if (!modal) return;
+
+    document.getElementById("main_edit_pk").value = pk;
+    document.getElementById("main_edit_date").value = date;
+    document.getElementById("main_edit_account").value = account;
+    document.getElementById("main_edit_category").value = category;
+    document.getElementById("main_edit_desc").value = description || "";
+    document.getElementById("main_edit_amount").value = Math.abs(Number(amount));
+
+    // 상세 카테고리 선택
+    const detailSelect = document.getElementById("main_edit_detail");
+    if (detailSelect) {
+        // 옵션 중에 일치하는 게 있으면 선택
+        let found = false;
+        for (const opt of detailSelect.options) {
+            if (opt.value === detail) {
+                opt.selected = true;
+                found = true;
+                break;
+            }
+        }
+        if (!found && detailSelect.options.length > 0) {
+            detailSelect.selectedIndex = 0;
+        }
+    }
+
+    // 주유 체크
+    const fuelCheck = document.getElementById("main_edit_is_fuel");
+    const fuelWrap = document.getElementById("main_edit_fuel_wrap");
+    const priceInput = document.getElementById("main_edit_price");
+
+    if (fuelCheck) fuelCheck.checked = isFuel;
+    if (fuelWrap) fuelWrap.style.display = isFuel ? "block" : "none";
+    if (priceInput) priceInput.value = price || "";
+
+    if (fuelCheck) {
+        fuelCheck.addEventListener("change", function () {
+            if (fuelWrap) fuelWrap.style.display = this.checked ? "block" : "none";
+        });
+    }
+
+    modal.style.display = "flex";
+}
+
+function applyLivingQuickInput(category, detailCategory, description, amount = "") {
+    const dateInput = document.getElementById("ui_date");
+    const categorySelect = document.getElementById("living-category-select");
+    const detailSelect = document.getElementById("ui_detail_category");
+    const descInput = document.getElementById("ui_desc");
+    const amountInput = document.getElementById("ui_amount");
+
+    if (!categorySelect || !detailSelect) return;
+
+    if (dateInput && !dateInput.value) {
+        dateInput.value = getTodayDate();
+    }
+
+    categorySelect.value = category;
+
+    if (typeof updateLivingDetailOptions === "function") {
+        updateLivingDetailOptions("living-category-select", "ui_detail_category", detailCategory);
+    } else {
+        detailSelect.value = detailCategory;
+    }
+
+    if (descInput) descInput.value = description || "";
+    if (amountInput) {
+        amountInput.value = amount || "";
+        amountInput.focus();
+    }
+}
+
+// =========================
+//  생활비 페이지 차트
+// =========================
+
+// 카테고리 도넛 차트
+function initDonutChart() {
+    const chartEl = document.getElementById('livingDonutChart');
+    if (!chartEl || typeof DONUT_CHART_DATA === 'undefined') return;
+
+    const labels = Array.isArray(DONUT_CHART_DATA.labels) ? DONUT_CHART_DATA.labels : [];
+    const values = Array.isArray(DONUT_CHART_DATA.values) ? DONUT_CHART_DATA.values : [];
+
+    if (!values.length) return;
+
+    const total = values.reduce((a, b) => a + b, 0);
+    if (total === 0) return;
+
+    const palette = [
+        '#d87955', '#e8a87c', '#f2c894',
+        '#7cc9b1', '#5db89a', '#4969d9',
+        '#7a62d7', '#b48610', '#17956f',
+        '#c96d5a', '#8c6bd8', '#d77f75',
+        '#cf7f5f',
+    ];
+
+    new Chart(chartEl, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: palette.slice(0, values.length),
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                hoverBorderWidth: 3,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '62%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            const v = ctx.parsed;
+                            const pct = ((v / total) * 100).toFixed(1);
+                            return `${ctx.label}: ${v.toLocaleString()}원 (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        },
+        plugins: [{
+            id: 'centerText',
+            afterDraw: function(chart) {
+                const { ctx, chartArea } = chart;
+                const cx = (chartArea.left + chartArea.right) / 2;
+                const cy = (chartArea.top + chartArea.bottom) / 2;
+
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                ctx.font = '700 13px "LeeJiEun", "Pretendard", sans-serif';
+                ctx.fillStyle = '#9a7a7d';
+                ctx.fillText('총 지출', cx, cy - 14);
+
+                ctx.font = '900 20px "LeeJiEun", "Pretendard", sans-serif';
+                ctx.fillStyle = '#d87955';
+                ctx.fillText(total.toLocaleString() + '원', cx, cy + 12);
+
+                ctx.restore();
+            }
+        }]
+    });
+}
+
+// 관리비 1년 추이 막대 차트
+function initRentChart() {
+    const chartEl = document.getElementById('livingRentChart');
+    if (!chartEl || typeof RENT_CHART_DATA === 'undefined') return;
+
+    const labels = RENT_CHART_DATA.labels;
+    const values = RENT_CHART_DATA.values;
+
+    const barColors = values.map((v, i) =>
+        i === values.length - 1 ? '#5db89a' : '#b8e7d7'
+    );
+
+    new Chart(chartEl, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: barColors,
+                borderRadius: 6,
+                borderSkipped: false,
+                maxBarThickness: 28,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: function(ctx) {
+                            return ctx[0].label;
+                        },
+                        label: function(ctx) {
+                            return ctx.parsed.y.toLocaleString() + '원';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        font: { size: 11, family: '"LeeJiEun", "Pretendard", sans-serif' },
+                        color: '#9a7a7d',
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f0ebe8' },
+                    ticks: {
+                        font: { size: 11, family: '"LeeJiEun", "Pretendard", sans-serif' },
+                        color: '#9a7a7d',
+                        callback: function(v) {
+                            if (v >= 10000) return (v / 10000) + '만';
+                            return v.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// =========================
+// living.html JSON 데이터 읽기
+// =========================
+
+function getJsonScriptData(id, defaultValue = null) {
+    const el = document.getElementById(id);
+    if (!el) return defaultValue;
+
+    try {
+        return JSON.parse(el.textContent);
+    } catch (e) {
+        console.log(id + " JSON parse error:", e);
+        return defaultValue;
+    }
+}
+
+// 생활비 카테고리 맵
+const livingCategoryMapData = getJsonScriptData("living-category-map-data", {});
+if (Object.keys(livingCategoryMapData).length > 0) {
+    window.LIVING_CATEGORY_MAP = livingCategoryMapData;
+}
+
+// 도넛차트 데이터
+const donutLabels = getJsonScriptData("living-chart-labels", []);
+const donutValues = getJsonScriptData("living-chart-values", []);
+
+if (donutLabels.length && donutValues.length) {
+    window.DONUT_CHART_DATA = {
+        labels: donutLabels,
+        values: donutValues
+    };
+}
+
+// 관리비 차트 데이터
+const rentLabels = getJsonScriptData("living-rent-labels", []);
+const rentValues = getJsonScriptData("living-rent-values", []);
+
+if (rentLabels.length && rentValues.length) {
+    window.RENT_CHART_DATA = {
+        labels: rentLabels,
+        values: rentValues
+    };
+}
+
+// 페이지 로드 시 차트 초기화
+document.addEventListener("DOMContentLoaded", function () {
+    initDonutChart();
+    initRentChart();
+});
