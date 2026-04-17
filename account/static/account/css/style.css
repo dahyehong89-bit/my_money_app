@@ -2340,25 +2340,6 @@ body:not(.living-page) .living-nav-card .mini-btn {
    CSS 맨 아래 추가
 ===================================== */
 
-/* 수정 버튼 */
-.living-page .mini-btn:not(.danger),
-.living-page a.mini-btn:not(.danger),
-.living-page button.mini-btn:not(.danger) {
-    background: #edf7f3 !important;
-    color: #3f7567 !important;
-    border: 1px solid #cfe7de !important;
-    box-shadow: none !important;
-}
-
-/* 수정 버튼 hover */
-.living-page .mini-btn:not(.danger):hover,
-.living-page a.mini-btn:not(.danger):hover,
-.living-page button.mini-btn:not(.danger):hover {
-    background: #dff1ea !important;
-    color: #2f6f60 !important;
-    transform: translateY(-1px);
-}
-
 /* 삭제 버튼 */
 .living-page .mini-btn.danger,
 .living-page a.mini-btn.danger,
