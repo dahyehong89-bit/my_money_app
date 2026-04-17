@@ -1840,14 +1840,6 @@ body.living-page .fixed-modal-actions button:first-child:hover {
 }
 
 /* ----- 레이아웃 ----- */
-
-.living-page .dashboard-3col {
-    display: grid;
-    grid-template-columns: 1.05fr 1.45fr 1fr;
-    gap: 24px;
-    align-items: start;
-}
-
 .living-page .column {
     min-width: 0;
     max-height: calc(100vh - 40px);
@@ -2144,12 +2136,6 @@ body.living-page .fixed-modal-actions button:first-child:hover {
     border: 1px solid #bfead9;
 }
 
-/* ----- 좌측 컬럼 스크롤 (패딩 제거) ----- */
-
-.living-page .column-left {
-    padding-right: 0;
-}
-
 /* ----- 반응형 ----- */
 
 @media (max-width: 1200px) {
@@ -2439,4 +2425,89 @@ body:not(.living-page) .living-nav-card .mini-btn {
     background: #f5f5f5 !important;
     color: #666 !important;
     border-color: #e0e0e0 !important;
+}
+
+/* =====================================
+   메인 페이지 거래내역
+   금액 위 / 수정삭제 아래 배치
+===================================== */
+
+body:not(.living-page) .history-row {
+    align-items: flex-start;
+}
+
+/* 우측 영역 전체 */
+body:not(.living-page) .history-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    min-width: 130px;
+    flex-shrink: 0;
+}
+
+/* 금액 */
+body:not(.living-page) .history-actions strong {
+    min-width: auto;
+    text-align: right;
+    line-height: 1.2;
+    font-size: 1.05rem;
+}
+
+/* 수정 삭제 버튼 줄 */
+body:not(.living-page) .history-actions .mini-btn,
+body:not(.living-page) .history-actions .danger {
+    width: 52px;
+    height: 32px;
+    padding: 0;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 버튼 두개 가로 정렬 */
+body:not(.living-page) .history-actions button,
+body:not(.living-page) .history-actions a {
+    margin: 0;
+}
+
+body:not(.living-page) .history-actions {
+    position: relative;
+}
+
+body:not(.living-page) .history-actions button {
+    order: 2;
+}
+
+body:not(.living-page) .history-actions a {
+    order: 3;
+}
+
+body:not(.living-page) .history-actions strong {
+    order: 1;
+}
+
+/* 수정삭제 한 줄로 */
+body:not(.living-page) .history-actions {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-areas:
+        "amount amount"
+        "edit delete";
+    justify-content: end;
+    row-gap: 8px;
+    column-gap: 8px;
+}
+
+body:not(.living-page) .history-actions strong {
+    grid-area: amount;
+}
+
+body:not(.living-page) .history-actions button {
+    grid-area: edit;
+}
+
+body:not(.living-page) .history-actions a {
+    grid-area: delete;
 }
