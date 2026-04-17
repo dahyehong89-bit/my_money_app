@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.conf import settings
 from collections import defaultdict
 from django.utils import timezone
 from django.db.models import Sum
@@ -13,8 +14,9 @@ from .category_config import (
 from datetime import date
 from calendar import monthrange
 import json
+from .decorators import simple_login_required
 
-
+@simple_login_required
 def index(request):
     if request.method == 'POST':
         edit_pk = request.POST.get('edit_pk')
@@ -300,6 +302,7 @@ def toggle_checklist(request, pk):
     return redirect(f"/?month={item_month}")
 
 
+@simple_login_required
 def living(request):
     today = timezone.localdate()
     selected_month = request.GET.get("month")
@@ -596,3 +599,26 @@ def living(request):
     }
 
     return render(request, "account/living.html", context)
+
+
+def simple_login(request):
+    if request.session.get("simple_auth_ok"):
+        return redirect("index")   # 메인 가계부 url name에 맞게 수정
+
+    error = ""
+
+    if request.method == "POST":
+        password = request.POST.get("password", "").strip()
+
+        if password == settings.SIMPLE_LOGIN_PASSWORD:
+            request.session["simple_auth_ok"] = True
+            return redirect("index")   # 로그인 후 이동할 페이지
+        else:
+            error = "비밀번호가 틀렸어요."
+
+    return render(request, "account/simple_login.html", {"error": error})
+
+
+def simple_logout(request):
+    request.session.flush()
+    return redirect("simple_login")
