@@ -2051,14 +2051,27 @@ body.living-page .fixed-modal-actions button:first-child:hover {
 }
 
 .living-page .living-history-actions .mini-btn {
-    height: 34px;
+    width: 52px;
+    height: 32px;
     padding: 0;
     border-radius: 12px;
+    font-size: 13px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    
     box-sizing: border-box;
+}
+
+/* 수정 버튼 민트톤 */
+.living-page .living-history-actions .mini-btn:not(.danger) {
+    background: #e6f4ef !important;
+    color: #2f6f60 !important;
+}
+
+.living-page .living-history-actions .mini-btn:not(.danger):hover {
+    background: #d5ece3 !important;
+    color: #1f5a4d !important;
+    transform: translateY(-1px);
 }
 
 /* ----- 반응형 ----- */
@@ -2269,16 +2282,6 @@ body:not(.living-page) .living-nav-card .mini-btn {
     transform: translateY(-1px);
 }
 
-/* 버튼 크기 정리 */
-.living-page .living-history-actions .mini-btn {
-    width:52px;
-    height: 32px;
-    border-radius: 12px;
-    font-size: 13px;
-    
-    padding: 0;
-}
-
 /* =====================================
    생활비 페이지 카테고리 총지출 태그 전용
    CSS 맨 아래 추가
@@ -2457,25 +2460,44 @@ body:not(.living-page) .history-row {
     align-items: flex-start;
 }
 
-/* 우측 영역 전체 */
+/* 우측 영역 전체 - 금액/수정/삭제 그리드 배치 */
 body:not(.living-page) .history-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-areas:
+        "amount amount"
+        "edit delete";
+    justify-content: end;
+    align-items: center;
+    row-gap: 8px;
+    column-gap: 8px;
     min-width: 130px;
     flex-shrink: 0;
+    position: relative;
 }
 
 /* 금액 */
 body:not(.living-page) .history-actions strong {
+    grid-area: amount;
     min-width: auto;
     text-align: right;
     line-height: 1.2;
     font-size: 1.05rem;
 }
 
-/* 수정 삭제 버튼 줄 */
+/* 수정 버튼 */
+body:not(.living-page) .history-actions button {
+    grid-area: edit;
+    margin: 0;
+}
+
+/* 삭제 버튼 */
+body:not(.living-page) .history-actions a {
+    grid-area: delete;
+    margin: 0;
+}
+
+/* 수정/삭제 버튼 공통 크기 */
 body:not(.living-page) .history-actions .mini-btn,
 body:not(.living-page) .history-actions .danger {
     width: 52px;
@@ -2485,52 +2507,24 @@ body:not(.living-page) .history-actions .danger {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    font-size: 13px;
 }
 
-/* 버튼 두개 가로 정렬 */
-body:not(.living-page) .history-actions button,
-body:not(.living-page) .history-actions a {
-    margin: 0;
+/* 수정 버튼 hover - 차분한 연한 핑크 */
+body:not(.living-page) .history-actions .mini-btn:not(.danger):hover {
+    background: #ecdde0 !important;
+    color: var(--text-color) !important;
+    transform: translateY(-1px);
+    box-shadow: none !important;
 }
 
-body:not(.living-page) .history-actions {
-    position: relative;
-}
-
-body:not(.living-page) .history-actions button {
-    order: 2;
-}
-
-body:not(.living-page) .history-actions a {
-    order: 3;
-}
-
-body:not(.living-page) .history-actions strong {
-    order: 1;
-}
-
-/* 수정삭제 한 줄로 */
-body:not(.living-page) .history-actions {
-    display: grid;
-    grid-template-columns: auto auto;
-    grid-template-areas:
-        "amount amount"
-        "edit delete";
-    justify-content: end;
-    row-gap: 8px;
-    column-gap: 8px;
-}
-
-body:not(.living-page) .history-actions strong {
-    grid-area: amount;
-}
-
-body:not(.living-page) .history-actions button {
-    grid-area: edit;
-}
-
-body:not(.living-page) .history-actions a {
-    grid-area: delete;
+/* 삭제 버튼 hover - 차분한 연한 빨강 */
+body:not(.living-page) .history-actions .mini-btn.danger:hover,
+body:not(.living-page) .history-actions a.danger:hover {
+    background: #ffd1d4 !important;
+    color: #c24043 !important;
+    transform: translateY(-1px);
+    box-shadow: none !important;
 }
 
 .history-header-row {
