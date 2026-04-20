@@ -1643,7 +1643,7 @@ body.living-page .month-filter-wrap label{color: #2f6f60;}
 /* 계좌 뱃지 */
 body.living-page .living-account-badge {
     display: inline-block;
-    padding: 18px 12px;
+    padding: 16px 12px;
     border-radius: 18px;
     background: #dff5ed;
     color: #2f6f60;
