@@ -2292,27 +2292,53 @@ body:not(.living-page) .living-nav-card .mini-btn {
     padding: 7px 12px;
     border-radius: 999px;
     font-size: 13px;
-    
     line-height: 1;
     border: 1px solid transparent;
     gap: 6px;
 }
 
-/* 주거비 */
-.living-page .living-category-card .tag:has-text("주거비") {}
-
-/* 주거비 (첫번째 줄 대응용) */
-.living-page .living-category-card .category-summary-row[data-category="주거비"] .tag {
-    background: #eef8f4 !important;
-    color: #2f6f60 !important;
-    border-color: #cfe7de !important;
+/* ----- 수입 ----- */
+/* 정기입금 */
+.living-page .living-category-card .category-summary-row[data-category="정기입금"] .tag {
+    background: #eaf2ff !important;
+    color: #4b6bcc !important;
+    border-color: #d3e0ff !important;
 }
 
+/* 추가수입 */
+.living-page .living-category-card .category-summary-row[data-category="추가수입"] .tag {
+    background: #f3ecff !important;
+    color: #7a52c8 !important;
+    border-color: #dfd0ff !important;
+}
+
+/* 환급 */
+.living-page .living-category-card .category-summary-row[data-category="환급"] .tag {
+    background: #e6f7f5 !important;
+    color: #2b8a83 !important;
+    border-color: #c9ebe6 !important;
+}
+
+/* ----- 지출 ----- */
 /* 식비 */
 .living-page .living-category-card .category-summary-row[data-category="식비"] .tag {
     background: #fff5ee !important;
     color: #d87955 !important;
     border-color: #ffd8c8 !important;
+}
+
+/* 영양식품 */
+.living-page .living-category-card .category-summary-row[data-category="영양식품"] .tag {
+    background: #eefaf0 !important;
+    color: #3a9a52 !important;
+    border-color: #cfeed3 !important;
+}
+
+/* 주거비 */
+.living-page .living-category-card .category-summary-row[data-category="주거비"] .tag {
+    background: #eef8f4 !important;
+    color: #2f6f60 !important;
+    border-color: #cfe7de !important;
 }
 
 /* 생활용품 */
@@ -2322,29 +2348,100 @@ body:not(.living-page) .living-nav-card .mini-btn {
     border-color: #d8e2ff !important;
 }
 
-/* 교통 */
-.living-page .living-category-card .category-summary-row[data-category="교통"] .tag {
-    background: #f8f3ff !important;
-    color: #7a63c9 !important;
-    border-color: #e5dbff !important;
+/* 가족용돈 */
+.living-page .living-category-card .category-summary-row[data-category="가족용돈"] .tag {
+    background: #ffeef5 !important;
+    color: #c94a7a !important;
+    border-color: #ffd3e3 !important;
 }
 
-/* 의료 */
-.living-page .living-category-card .category-summary-row[data-category="의료"] .tag {
-    background: #fff0f3 !important;
-    color: #d85f7d !important;
-    border-color: #ffd5de !important;
+/* 자동차관련 */
+.living-page .living-category-card .category-summary-row[data-category="자동차관련"] .tag {
+    background: #eaf3ff !important;
+    color: #3b7dc4 !important;
+    border-color: #cfe0f7 !important;
 }
 
-/* 문화 */
-.living-page .living-category-card .category-summary-row[data-category="문화"] .tag,
-.living-page .living-category-card .category-summary-row[data-category="여가"] .tag {
-    background: #fffbe8 !important;
-    color: #a67c00 !important;
-    border-color: #f2e2a0 !important;
+/* 쇼핑 */
+.living-page .living-category-card .category-summary-row[data-category="쇼핑"] .tag {
+    background: #ffecf4 !important;
+    color: #d4458a !important;
+    border-color: #fcd2e5 !important;
 }
 
-/* 기타 */
+/* 여행관련 */
+.living-page .living-category-card .category-summary-row[data-category="여행관련"] .tag {
+    background: #e6f4fa !important;
+    color: #2a8fa8 !important;
+    border-color: #c7e5ee !important;
+}
+
+/* 카페/간식 */
+.living-page .living-category-card .category-summary-row[data-category="카페/간식"] .tag {
+    background: #faeedc !important;
+    color: #a0673a !important;
+    border-color: #ebd5b4 !important;
+}
+
+/* 선물 */
+.living-page .living-category-card .category-summary-row[data-category="선물"] .tag {
+    background: #ffecec !important;
+    color: #d15454 !important;
+    border-color: #ffd3d3 !important;
+}
+
+/* 문화활동 */
+.living-page .living-category-card .category-summary-row[data-category="문화활동"] .tag {
+    background: #f0ebff !important;
+    color: #6a52c4 !important;
+    border-color: #dccfff !important;
+}
+
+/* 병원/건강 */
+.living-page .living-category-card .category-summary-row[data-category="병원/건강"] .tag {
+    background: #eaf7ed !important;
+    color: #3a9a52 !important;
+    border-color: #cbe9d1 !important;
+}
+
+/* ----- 비상금 ----- */
+/* 비상금 넣기 */
+.living-page .living-category-card .category-summary-row[data-category="비상금 넣기"] .tag {
+    background: #fff6dd !important;
+    color: #c78a1e !important;
+    border-color: #f5e3b0 !important;
+}
+
+/* 비상금 빼기 */
+.living-page .living-category-card .category-summary-row[data-category="비상금 빼기"] .tag {
+    background: #ffeed9 !important;
+    color: #d26b2a !important;
+    border-color: #f5d0a8 !important;
+}
+
+/* 비상금 직접입금 */
+.living-page .living-category-card .category-summary-row[data-category="비상금 직접입금"] .tag {
+    background: #fdf0e0 !important;
+    color: #b07030 !important;
+    border-color: #ebd6bf !important;
+}
+
+/* ----- 현금 ----- */
+/* 현금 넣기 */
+.living-page .living-category-card .category-summary-row[data-category="현금 넣기"] .tag {
+    background: #eaf8ee !important;
+    color: #2e8b57 !important;
+    border-color: #c9e9d1 !important;
+}
+
+/* 현금 쓰기 */
+.living-page .living-category-card .category-summary-row[data-category="현금 쓰기"] .tag {
+    background: #dff2e3 !important;
+    color: #256a43 !important;
+    border-color: #bfe0c6 !important;
+}
+
+/* ----- 기타 (fallback) ----- */
 .living-page .living-category-card .category-summary-row[data-category="기타"] .tag {
     background: #f5f5f5 !important;
     color: #666 !important;
