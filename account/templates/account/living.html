@@ -139,7 +139,7 @@
                      <div class="living-history-item" data-filter-type="{% if item.category == 'income' %}income{% elif item.category == 'expense' %}expense{% elif item.detail_category|slice:':3' == '비상금' %}emergency{% elif item.detail_category|slice:':2' == '현금' %}cash{% else %}other{% endif %}">
                         <div class="living-history-left">
                             <div class="living-history-meta">
-                                <span class="history-date-pill">{{ item.date|date:"m/d" }}</span>
+                                <span class="history-date">{{ item.date|date:"m/d" }}</span>
 
                                 <span class="tag
                                     {% if item.category == 'income' %}
@@ -163,7 +163,7 @@
                                     {% endif %}
                                 </span>
 
-                                <span class="tag tag-detail
+                                <span class="tag tag-detail cat-{{ item.detail_category|cut:' '|cut:'/' }}
                                     {% if item.detail_category|slice:':3' == '비상금' %}
                                         tag-emergency
                                     {% elif item.detail_category|slice:':2' == '현금' %}
@@ -188,9 +188,9 @@
                                 <strong class="
                                     {% if item.category == 'income' %}
                                         income
-                                    {% elif item.category == 'non_expense' and item.detail_category == '비상금' %}
+                                    {% elif item.detail_category|slice:':3' == '비상금' %}
                                         emergency-money
-                                    {% elif item.category == 'non_expense' and item.detail_category == '현금' %}
+                                    {% elif item.detail_category|slice:':2' == '현금' %}
                                         cash-money
                                     {% else %}
                                         expense

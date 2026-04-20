@@ -1,12 +1,45 @@
+/* ==============================================================
+   🎨 테마 시스템
+   - 기본값: 핑크 테마 (메인 가계부)
+   - body.living-page 에서 자동으로 민트로 교체
+   - CSS 본문에서는 var(--theme-XXX) 만 쓰면 됨
+============================================================== */
 :root {
-    --primary-color: #ffcfd2;
+    /* ----- 공통 UI 역할 변수 (기본 = 핑크 테마) ----- */
+    --theme-primary:        #ffcfd2;                      /* 버튼/포인트 배경 */
+    --theme-primary-hover:  #ffb1b6;                      /* 버튼 hover */
+    --theme-accent:         #ff8a93;                      /* 강조색 (포커스/아이콘) */
+    --theme-accent-hover:   #ff7d87;                      /* 강조 hover */
+    --theme-soft:           #fff8f9;                      /* 연한 배경 (카드 등) */
+    --theme-line:           #ffe4e6;                      /* 테두리/구분선 */
+    --theme-text:           #a35d63;                      /* 본문 글자 */
+    --theme-bg:             #fcf4f5;                      /* 페이지 배경 */
+    --theme-shadow:         rgba(255, 182, 193, 0.35);    /* 버튼 그림자 */
+    --theme-shadow-soft:    rgba(255, 182, 193, 0.12);    /* 은은한 그림자 */
+
+    /* ----- 기존 변수 (호환성 유지 / 점진적 이전용) ----- */
+    --primary-color:   var(--theme-primary);
     --secondary-color: #cfdeff;
-    --bg-color: #fcf4f5;
-    --text-color: #a35d63;
-    --accent-color: #ff8a93;
-    --soft-pink: #fff8f9;
-    --line-pink: #ffe4e6;
-    --shadow-pink: rgba(255, 182, 193, 0.12);
+    --bg-color:        var(--theme-bg);
+    --text-color:      var(--theme-text);
+    --accent-color:    var(--theme-accent);
+    --soft-pink:       var(--theme-soft);
+    --line-pink:       var(--theme-line);
+    --shadow-pink:     var(--theme-shadow-soft);
+}
+
+/* ----- 생활비 페이지: 민트 테마로 자동 전환 ----- */
+body.living-page {
+    --theme-primary:        #7cc9b1;
+    --theme-primary-hover:  #67b79d;
+    --theme-accent:         #2f6f60;
+    --theme-accent-hover:   #247059;
+    --theme-soft:           #f3fbf7;
+    --theme-line:           #b8dfd1;
+    --theme-text:           #2f6f60;
+    --theme-bg:             #f3fbf7;
+    --theme-shadow:         rgba(124, 201, 177, 0.35);
+    --theme-shadow-soft:    rgba(124, 201, 177, 0.12);
 }
 
 @font-face {
@@ -38,6 +71,8 @@ body {
     overflow: hidden;
     color: var(--text-color);
 }
+
+strong{font-weight:normal}
 
 /* =========================
    레이아웃
@@ -142,12 +177,12 @@ body {
 
 .summary-card details summary {
     padding: 6px 0;
-    font-weight: 600;
+    
 }
 
 .summary-card details details summary {
     font-size: 14px;
-    font-weight: 600;
+    
     color: #8a5a5a;
 }
 
@@ -157,7 +192,7 @@ body {
 
 .big-amount {
     font-size: 1.7rem;
-    font-weight: 800;
+    
     color: var(--text-color);
     margin: 10px 0 6px;
 }
@@ -170,7 +205,7 @@ body {
 
 .left-money {
     color: #5f8fd8;
-    font-weight: 800;
+    
 }
 
 /* =========================
@@ -234,19 +269,24 @@ select {
     cursor: pointer;
 }
 
+/* 생활비 페이지 select 화살표는 민트(#2f6f60)로 */
+body.living-page select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%232f6f60' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
 button {
-    background-color: var(--primary-color);
-    color: var(--text-color);
-    font-weight: bold;
+    background-color: var(--theme-primary);
+    color: var(--theme-text);
+    
     border: none;
     cursor: pointer;
     font-size: 1.05rem;
 }
 
 button:hover {
-    background-color: #ffb1b6;
+    background-color: var(--theme-primary-hover);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(255, 182, 193, 0.35);
+    box-shadow: 0 5px 15px var(--theme-shadow);
 }
 
 /* =========================
@@ -301,7 +341,7 @@ button:hover {
 .submit-btn {
     background: var(--accent-color);
     color: white;
-    font-weight: 800;
+    
     box-shadow: 0 6px 18px rgba(255, 138, 147, 0.25);
 }
 
@@ -316,7 +356,7 @@ button:hover {
     background: #f3e8ea;
     color: var(--text-color);
     font-size: 0.8rem;
-    font-weight: 700;
+    font-size:16px;
     text-decoration: none;
     border: none;
     white-space: nowrap;
@@ -437,7 +477,7 @@ button:hover {
     padding: 3px 8px;
     border-radius: 8px;
     font-size: 12px;
-    font-weight: 600;
+    
     color: #7f6f71;
 }
 
@@ -447,72 +487,44 @@ button:hover {
 
 .income,
 .amount-income {
-    color: #4dabf7;
-    font-weight: 800;
+    color: #4dabf7;    
 }
 
 .expense,
 .amount-expense {
-    color: #ff6b6b;
-    font-weight: 800;
+    color: #ff6b6b;    
 }
 
 .non-expense,
 .amount-non-expense {
-    color: #6c7bd1;
-    font-weight: 700;
+    color: #6c7bd1;    
+}
+
+/* 비상금 금액 - 황금색톤 */
+.emergency-money {
+    color: #d99a1e;
+}
+
+/* 현금 금액 - 진한 초록 */
+.cash-money {
+    color: #2e8b57;
 }
 
 /* =========================
    태그
 ========================= */
-
 .tag {
-    display: inline-block;
-    padding: 4px 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
     border-radius: 999px;
     background: #f8dfe3;
     color: #9c6268;
-    font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.2;
-}
-
-.tag-hyundai,
-.tag-shinhan,
-.tag-incident,
-.tag-cash {
-    font-weight: 700;
-}
-
-.tag-hyundai {
-    background: #f3f3f3;
-    color: #555;
-    border: 1px solid #e1e1e1;
-}
-
-.tag-shinhan {
-    background: #eef4ff;
-    color: #3b6fd8;
-    border: 1px solid #d6e4ff;
-}
-
-.tag-incident {
-    background: #faf0ff;
-    color: #a64db6;
-    border: 1px solid #efd7ff;
-}
-
-.tag-cash {
-    background: #eefaf2;
-    color: #2d8a57;
-    border: 1px solid #d8f0df;
-}
-
-.tag-non-expense {
-    background: #eef1ff !important;
-    color: #6c7bd1 !important;
-    border: 1px solid #d9defc;
+    font-size: 13px;
+    
+    line-height: 1;
+    border: 1px solid transparent;
 }
 
 .empty-text {
@@ -565,7 +577,7 @@ details[open] {
 
 .detail-amount {
     font-size: 14px;
-    font-weight: 700;
+    
     color: #cf6b6b;
     flex-shrink: 0;
     min-width: 96px;
@@ -576,7 +588,7 @@ details[open] {
 summary {
     list-style: none;
     cursor: pointer;
-    font-weight: 800;
+    
     color: var(--text-color);
 }
 
@@ -786,7 +798,7 @@ details details summary {
     flex: 1;
     padding: 12px;
     border-radius: 14px;
-    font-weight: 800;
+    
     margin-top: 0;
 }
 
@@ -858,7 +870,7 @@ details details summary {
     font-size: 0.85rem;
     color: #d96b77;
     margin-top: 8px;
-    font-weight: 700;
+    
 }
 
 .btn-fuel {
@@ -868,7 +880,7 @@ details details summary {
     padding: 12px;
     border-radius: 15px;
     width: 100%;
-    font-weight: bold;
+    
     cursor: pointer;
     transition: 0.3s;
 }
@@ -928,7 +940,7 @@ details details summary {
 
 .fuel-summary-line strong {
     color: var(--text-color);
-    font-weight: 800;
+    
 }
 
 .fuel-memo {
@@ -969,7 +981,7 @@ details details summary {
 }
 
 .month-filter-wrap label {
-    font-weight: 600;
+    
     color: #8a5a5a;
 }
 
@@ -983,7 +995,7 @@ details details summary {
 .month-title {
     display: block;
     margin-bottom: 8px;
-    font-weight: 700;
+    
     color: #8d5d5d;
 }
 
@@ -1012,9 +1024,9 @@ details details summary {
     flex: 1;
     height: 44px;
     border-radius: 12px;
-    font-weight: 700;
-    background: #f7eded;
-    color: #9a6666;
+    
+    background: var(--accent-color);
+    color: #fff;
     border: none;
 }
 
@@ -1049,7 +1061,7 @@ details details summary {
 
 .check-summary-title {
     font-size: 1.15rem;
-    font-weight: 800;
+    
     color: #2f2f2f;
     margin-bottom: 8px;
 }
@@ -1086,7 +1098,7 @@ details details summary {
     gap: 8px;
     min-height: 44px;
     padding: 14px 16px;
-    font-weight: 700;
+    
     color: #2f2f2f;
     background: #fcfcfc;
     cursor: pointer;
@@ -1192,7 +1204,7 @@ details details summary {
     border: 1px solid #cfd8ea;
     background: #fff;
     border-radius: 999px;
-    font-weight: 700;
+    
     font-size: 14px;
     color: #4f5f8d;
     cursor: pointer;
@@ -1245,7 +1257,7 @@ details details summary {
 .fixed-modal-header h3 {
     margin: 0;
     font-size: 22px;
-    font-weight: 800;
+    
     color: #7b4f4f;
     line-height: 1.2;
     flex: 1;
@@ -1291,7 +1303,7 @@ details details summary {
 
 .fixed-modal .modal-field label {
     font-size: 14px;
-    font-weight: 700;
+    
     color: #8b5e5e;
 }
 
@@ -1328,7 +1340,7 @@ details details summary {
     gap: 10px;
     min-height: 24px;
     font-size: 14px;
-    font-weight: 700;
+    
     color: #8b5e5e;
     cursor: pointer;
 }
@@ -1354,7 +1366,7 @@ details details summary {
     flex: 1;
     height: 42px;
     border-radius: 12px;
-    font-weight: 700;
+    
     font-size: 14px;
     display: inline-flex;
     align-items: center;
@@ -1481,7 +1493,7 @@ details details summary {
 .edit-title {
     margin: 0 0 20px 0;
     font-size: 24px;
-    font-weight: 700;
+    
 }
 
 .edit-form {
@@ -1498,7 +1510,7 @@ details details summary {
 
 .edit-field label {
     font-size: 14px;
-    font-weight: 600;
+    
     color: #333;
 }
 
@@ -1532,7 +1544,7 @@ details details summary {
 .edit-form .fuel-check {
     display: inline-flex;
     font-size: 14px;
-    font-weight: 500;
+    
     cursor: pointer;
 }
 
@@ -1621,54 +1633,12 @@ body.living-page .month-btn:hover {
     background: #67b79d;
 }
 
-/* 태그 */
-/* 생활비 태그 공통 */
-.living-page .tag {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px 12px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 800;
-    line-height: 1;
-    border: 1px solid transparent;
-}
-
-/* 입금 */
-.living-page .tag-income {
-    background: #eef3ff;
-    color: #4b6bff;
-    border-color: #d9e3ff;
-}
-
-/* 지출 */
-.living-page .tag-expense {
-    background: #fff3ea;
-    color: #dd7a45;
-    border-color: #ffd8c2;
-}
-
-/* 비상금 */
-.living-page .tag-emergency {
-    background: #fff8d9;
-    color: #a77700;
-    border-color: #f2dd8a;
-}
-
-/* 현금 */
-.living-page .tag-cash {
-    background: #e8fff4;
-    color: #12936b;
-    border-color: #bfe9d7;
-}
-
-/* 상세 카테고리 공통 */
-.living-page .tag-detail {
-    background: #f3fbf7;
+/* 생활비 페이지 h3 제목은 민트 진한색 */
+body.living-page h3 {
     color: #2f6f60;
-    border-color: #d5ece3;
 }
+
+body.living-page .month-filter-wrap label{color: #2f6f60;}
 
 /* 계좌 뱃지 */
 body.living-page .living-account-badge {
@@ -1677,7 +1647,7 @@ body.living-page .living-account-badge {
     border-radius: 18px;
     background: #dff5ed;
     color: #2f6f60;
-    font-weight: 700;
+    
 }
 
 /* 입력 요소 테두리 */
@@ -1718,7 +1688,7 @@ body.living-page .modal-title {
 body.living-page .modal-content label,
 body.living-page .fixed-modal label {
     color: #855d5d !important;
-    font-weight: 700;
+    
 }
 
 body.living-page .close-modal,
@@ -1787,7 +1757,7 @@ body.living-page .fuel-check label,
 body.living-page .fuel-box label,
 body.living-page .checkbox-row label {
     color: #2f6f60 !important;
-    font-weight: 600;
+    
 }
 
 /* 모달 하단 버튼 */
@@ -1802,7 +1772,7 @@ body.living-page .btn-submit,
 body.living-page .confirm-btn {
     border-radius: 16px !important;
     height: 44px;
-    font-weight: 700;
+    
     border: none !important;
     box-shadow: none !important;
 }
@@ -1879,7 +1849,6 @@ body.living-page .fixed-modal-actions button:first-child:hover {
     width: 100%;
     height: 52px;
     border-radius: 18px;
-    font-weight: 800;
     font-size: 16px;
     line-height: 1;
     padding: 0;
@@ -1915,7 +1884,7 @@ body.living-page .fixed-modal-actions button:first-child:hover {
 .living-page .side-summary-grid .living-mini-card .card-value,
 .living-page .side-summary-grid .living-total-card .card-value {
     font-size: 18px;
-    font-weight: 800;
+    
     line-height: 1.25;
     letter-spacing: -0.2px;
 }
@@ -2017,9 +1986,9 @@ body.living-page .fixed-modal-actions button:first-child:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 18px;
-    padding: 18px 0;
-    border-bottom: 1px solid #e8efe9;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px dashed var(--theme-line);
 }
 
 .living-page .living-history-item:last-child {
@@ -2046,7 +2015,7 @@ body.living-page .fixed-modal-actions button:first-child:hover {
 .living-page .living-history-desc {
     color: #7a5f58;
     font-size: 16px;
-    font-weight: 600;
+    
     line-height: 1.4;
     word-break: break-word;
     padding-left: 2px;
@@ -2082,57 +2051,14 @@ body.living-page .fixed-modal-actions button:first-child:hover {
 }
 
 .living-page .living-history-actions .mini-btn {
-    width: 56px;
-    min-width: 56px;
     height: 34px;
     padding: 0;
     border-radius: 12px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    
     box-sizing: border-box;
-}
-
-/* ----- 금액 색상 ----- */
-
-.living-page .income {
-    color: #4b6bff;
-    font-weight: 800;
-}
-
-.living-page .expense {
-    color: #d87955;
-    font-weight: 800;
-}
-
-.living-page .non-expense {
-    color: #8c6bd8;
-    font-weight: 800;
-}
-
-.living-page .emergency-money {
-    color: #b8860b;
-    font-weight: 900;
-}
-
-.living-page .cash-money {
-    color: #15a57c;
-    font-weight: 900;
-}
-
-/* ----- 태그 색상 ----- */
-
-.living-page .tag-emergency {
-    background: #fff5cf;
-    color: #9a6a00;
-    border: 1px solid #f2db88;
-}
-
-.living-page .tag-cash {
-    background: #e8fff7;
-    color: #00805a;
-    border: 1px solid #bfead9;
 }
 
 /* ----- 반응형 ----- */
@@ -2186,7 +2112,7 @@ body.living-page .fixed-modal-actions button:first-child:hover {
     width: 100%;
     height: 52px;
     border-radius: 18px;
-    font-weight: 700;
+    
     font-size: 16px;
     line-height: 1;
     padding: 0;
@@ -2228,7 +2154,7 @@ body:not(.living-page) .living-nav-card .mini-btn {
     border: 1px solid #bfded3;
     background: #fff;
     color: #2f6f60;
-    font-weight: 700;
+    
     font-size: 14px;
 
     display: flex;
@@ -2290,7 +2216,7 @@ body:not(.living-page) .living-nav-card .mini-btn {
     background: #f4f1f1;
     color: #8f8085;
     font-size: 12px;
-    font-weight: 700;
+    
 }
 
 .living-page .history-desc-inline {
@@ -2307,7 +2233,7 @@ body:not(.living-page) .living-nav-card .mini-btn {
 
 .living-page .compact-right .expense {
     font-size: 17px;
-    font-weight: 800;
+    
     color: #d97b58;
 }
 
@@ -2331,7 +2257,6 @@ body:not(.living-page) .living-nav-card .mini-btn {
 .living-page button.mini-btn.danger {
     background: #fff1ee !important;
     color: #d87955 !important;
-    border: 1px solid #ffd7ca !important;
     box-shadow: none !important;
 }
 
@@ -2346,11 +2271,11 @@ body:not(.living-page) .living-nav-card .mini-btn {
 
 /* 버튼 크기 정리 */
 .living-page .living-history-actions .mini-btn {
-    min-width: 58px;
-    height: 34px;
+    width:52px;
+    height: 32px;
     border-radius: 12px;
     font-size: 13px;
-    font-weight: 800;
+    
     padding: 0;
 }
 
@@ -2367,7 +2292,7 @@ body:not(.living-page) .living-nav-card .mini-btn {
     padding: 7px 12px;
     border-radius: 999px;
     font-size: 13px;
-    font-weight: 800;
+    
     line-height: 1;
     border: 1px solid transparent;
     gap: 6px;
@@ -2535,3 +2460,97 @@ body:not(.living-page) .history-actions a {
     padding: 20px 0;
     font-size: 0.95rem;
 }
+
+/* ==============================================================
+   🎨 태그 / 카테고리 색상 모음 (한 곳에 몰아놓기)
+   - 메인 가계부 카드사 태그
+   - 생활비 통장 타입 태그 (입금/지출/비상금/현금)
+   - 세부 카테고리별 컬러 (cat-XXX)
+============================================================== */
+
+/* ----- 공통: 굵기 / 테두리 기본값 ----- */
+.tag-hyundai,
+.tag-shinhan,
+.tag-incident,
+.tag-cash {
+    
+}
+
+/* ==========================================
+   1. 메인 가계부 - 카드사/계좌 태그
+========================================== */
+.tag-hyundai    { background: #f3f3f3; color: #555;    border: 1px solid #e1e1e1; }
+.tag-shinhan    { background: #eef4ff; color: #3b6fd8; border: 1px solid #d6e4ff; }
+.tag-incident   { background: #faf0ff; color: #a64db6; border: 1px solid #efd7ff; }
+.tag-cash       { background: #eefaf2; color: #2d8a57; border: 1px solid #d8f0df; }
+
+.tag-non-expense {
+    background: #eef1ff !important;
+    color: #6c7bd1 !important;
+    border: 1px solid #d9defc;
+}
+
+/* ==========================================
+   2. 생활비 통장 - 타입 태그
+========================================== */
+.living-page .tag-income    { background: #eef3ff; color: #4b6bff; border-color: #d9e3ff; }
+.living-page .tag-expense   { background: #fff3ea; color: #dd7a45; border-color: #ffd8c2; }
+.living-page .tag-emergency { background: #fff8d9; color: #a77700; border-color: #f2dd8a; }
+.living-page .tag-cash      { background: #e8fff4; color: #12936b; border-color: #bfe9d7; }
+.living-page .tag-detail    { background: #f3fbf7; color: #2f6f60; border-color: #d5ece3; }
+
+/* ==========================================
+   3. 세부 카테고리별 색상 (메인 가계부)
+========================================== */
+.cat-외식        { background: #ffe5d4; color: #d2691e; }
+.cat-커피        { background: #f5e1c8; color: #8b5a2b; }
+.cat-배달        { background: #ffdacc; color: #d2572b; }
+.cat-장보기      { background: #d4f5dc; color: #2e8b57; }
+.cat-쇼핑        { background: #ffd9ec; color: #d4458a; }
+.cat-생활용품    { background: #f0e5ff; color: #8a5cd6; }
+.cat-미용        { background: #ffd6e8; color: #c94a7a; }
+.cat-주유        { background: #fff4c4; color: #b8922a; }
+.cat-교통        { background: #d6eaff; color: #3b7dc4; }
+.cat-관리비      { background: #fde2e4; color: #c9546a; }
+.cat-보험        { background: #dfe7f5; color: #4a6fa5; }
+.cat-통신비      { background: #e0f0ff; color: #2b6cb5; }
+.cat-구독        { background: #e6e0ff; color: #6a52c4; }
+.cat-병원비      { background: #dff5e1; color: #3a9a52; }
+.cat-경조사      { background: #f5d8dc; color: #a84a5a; }
+.cat-선물        { background: #ffdede; color: #d15454; }
+.cat-여행        { background: #d8f0f7; color: #2a8fa8; }
+.cat-정산        { background: #e8d9ff; color: #7a4fc8; }
+.cat-고정비      { background: #f0d4d4; color: #a85454; }
+
+/* ==========================================
+   4. 세부 카테고리별 색상 (생활비 통장)
+   - .tag-detail 와 조합, !important 로 타입 색 덮어씀
+========================================== */
+/* 수입 */
+.living-page .tag-detail.cat-정기입금        { background: #d6f0ff !important; color: #2b78b5 !important; }
+.living-page .tag-detail.cat-추가수입        { background: #e8d9ff !important; color: #7a4fc8 !important; }
+.living-page .tag-detail.cat-환급            { background: #d0f0ee !important; color: #2c8f8a !important; }
+
+/* 지출 */
+.living-page .tag-detail.cat-식비            { background: #ffe5d4 !important; color: #d2691e !important; }
+.living-page .tag-detail.cat-영양식품        { background: #d4f5dc !important; color: #2e8b57 !important; }
+.living-page .tag-detail.cat-주거비          { background: #fde2e4 !important; color: #c9546a !important; }
+.living-page .tag-detail.cat-생활용품        { background: #f0e5ff !important; color: #8a5cd6 !important; }
+.living-page .tag-detail.cat-가족용돈        { background: #ffd6e8 !important; color: #c94a7a !important; }
+.living-page .tag-detail.cat-자동차관련      { background: #d6eaff !important; color: #3b7dc4 !important; }
+.living-page .tag-detail.cat-쇼핑            { background: #ffd9ec !important; color: #d4458a !important; }
+.living-page .tag-detail.cat-여행관련        { background: #d8f0f7 !important; color: #2a8fa8 !important; }
+.living-page .tag-detail.cat-카페간식        { background: #f5e1c8 !important; color: #a0673a !important; }
+.living-page .tag-detail.cat-선물            { background: #ffdede !important; color: #d15454 !important; }
+.living-page .tag-detail.cat-문화활동        { background: #e6e0ff !important; color: #6a52c4 !important; }
+.living-page .tag-detail.cat-병원건강        { background: #dff5e1 !important; color: #3a9a52 !important; }
+.living-page .tag-detail.cat-기타            { background: #eee    !important; color: #888    !important; }
+
+/* 비상금 */
+.living-page .tag-detail.cat-비상금넣기      { background: #fff0d4 !important; color: #c78a1e !important; }
+.living-page .tag-detail.cat-비상금빼기      { background: #ffe0c4 !important; color: #d26b2a !important; }
+.living-page .tag-detail.cat-비상금직접입금  { background: #fce8d0 !important; color: #b07030 !important; }
+
+/* 현금 */
+.living-page .tag-detail.cat-현금넣기        { background: #d4f5dc !important; color: #2e8b57 !important; }
+.living-page .tag-detail.cat-현금쓰기        { background: #c8ebd0 !important; color: #256a43 !important; }
