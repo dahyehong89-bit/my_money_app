@@ -443,6 +443,7 @@
 
     {{ rent_chart_labels_json|json_script:"living-rent-labels" }}
     {{ rent_chart_values_json|json_script:"living-rent-values" }}
+    {{ rent_chart_prev_values_json|json_script:"living-rent-prev-values" }}
 
     <script src="{% static 'account/js/script.js' %}?v=7"></script>
 </body>

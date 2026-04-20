@@ -546,9 +546,10 @@ def living(request):
         rent_chart_labels.append(f"{m}월")
         rent_chart_values.append(abs(rent_month_total))
 
-    # 최근 12개월 관리비 추이
+    # 최근 12개월 관리비 추이 (올해 + 작년 동일월)
     rent_labels = []
-    rent_values = []
+    rent_values = []         # 올해 (현재 12개월)
+    rent_prev_values = []    # 작년 같은 달 (12개월)
 
     for i in range(11, -1, -1):
         y = month_start.year
@@ -565,6 +566,7 @@ def living(request):
         month_label = f"{y % 100:02d}.{m:02d}"
         rent_labels.append(month_label)
 
+        # 올해 주거비
         monthly_rent_total = Transaction.objects.filter(
             account_type="living",
             date__year=y,
@@ -572,8 +574,17 @@ def living(request):
             category="expense",
             detail_category="주거비"
         ).aggregate(Sum("amount"))["amount__sum"] or 0
-
         rent_values.append(abs(monthly_rent_total))
+
+        # 작년 같은 달 주거비
+        prev_rent_total = Transaction.objects.filter(
+            account_type="living",
+            date__year=y - 1,
+            date__month=m,
+            category="expense",
+            detail_category="주거비"
+        ).aggregate(Sum("amount"))["amount__sum"] or 0
+        rent_prev_values.append(abs(prev_rent_total))
 
     context = {
         "today": today,
@@ -604,6 +615,7 @@ def living(request):
 
         "rent_chart_labels_json": rent_labels,
         "rent_chart_values_json": rent_values,
+        "rent_chart_prev_values_json": rent_prev_values,
 
         "living_category_map_json": LIVING_CATEGORY_MAP,
 

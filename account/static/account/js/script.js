@@ -682,14 +682,16 @@ function initDonutChart() {
     });
 }
 
-// 관리비 1년 추이 막대 차트
+// 관리비 1년 추이 (올해 막대 + 작년 선)
 function initRentChart() {
     const chartEl = document.getElementById('livingRentChart');
     if (!chartEl || typeof RENT_CHART_DATA === 'undefined') return;
 
     const labels = RENT_CHART_DATA.labels;
     const values = RENT_CHART_DATA.values;
+    const prevValues = RENT_CHART_DATA.prevValues || [];
 
+    // 올해 막대: 마지막 달(선택월)만 진한 민트, 나머지는 연한 민트
     const barColors = values.map((v, i) =>
         i === values.length - 1 ? '#5db89a' : '#b8e7d7'
     );
@@ -698,26 +700,55 @@ function initRentChart() {
         type: 'bar',
         data: {
             labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor: barColors,
-                borderRadius: 6,
-                borderSkipped: false,
-                maxBarThickness: 28,
-            }]
+            datasets: [
+                {
+                    label: '올해',
+                    type: 'bar',
+                    data: values,
+                    backgroundColor: barColors,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    maxBarThickness: 28,
+                    order: 2,
+                },
+                {
+                    label: '작년',
+                    type: 'line',
+                    data: prevValues,
+                    borderColor: '#d8a7a7',
+                    backgroundColor: '#d8a7a7',
+                    borderWidth: 2,
+                    borderDash: [5, 4],
+                    pointRadius: 3,
+                    pointBackgroundColor: '#d8a7a7',
+                    tension: 0.3,
+                    fill: false,
+                    order: 1,
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false },
+                legend: {
+                    display: true,
+                    position: 'top',
+                    align: 'end',
+                    labels: {
+                        font: { size: 11, family: '"LeeJiEun", "Pretendard", sans-serif' },
+                        color: '#9a7a7d',
+                        boxWidth: 12,
+                        padding: 10,
+                    }
+                },
                 tooltip: {
                     callbacks: {
                         title: function(ctx) {
                             return ctx[0].label;
                         },
                         label: function(ctx) {
-                            return ctx.parsed.y.toLocaleString() + '원';
+                            return ctx.dataset.label + ': ' + ctx.parsed.y.toLocaleString() + '원';
                         }
                     }
                 }
@@ -783,11 +814,13 @@ if (donutLabels.length && donutValues.length) {
 // 관리비 차트 데이터
 const rentLabels = getJsonScriptData("living-rent-labels", []);
 const rentValues = getJsonScriptData("living-rent-values", []);
+const rentPrevValues = getJsonScriptData("living-rent-prev-values", []);
 
 if (rentLabels.length && rentValues.length) {
     window.RENT_CHART_DATA = {
         labels: rentLabels,
-        values: rentValues
+        values: rentValues,
+        prevValues: rentPrevValues
     };
 }
 
