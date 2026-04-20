@@ -145,10 +145,20 @@
             <!-- 2단 -->
             <section class="column column-center">
                 <div class="summary-card">
-                    <h3>📂 전체 거래 내역</h3>
+                    <div class="history-header-row">
+                        <h3>📋 전체 거래 내역</h3>
+                        <select id="main_history_filter" class="history-filter-select">
+                            <option value="all">🌈 전체</option>
+                            <option value="hyundai">💳 현대카드</option>
+                            <option value="shinhan">💳 신한카드</option>
+                            <option value="incident">📌 사건비</option>
+                            <option value="cash_transfer">💵 현금/이체</option>
+                        </select>
+                    </div>
+                    <p class="history-filter-empty" id="main_history_empty" style="display:none;">조건에 맞는 내역이 없어요.</p>
 
                     {% for item in history %}
-                    <div class="history-row">
+                    <div class="history-row" data-filter-account="{{ item.account_type }}">
                         <div class="history-left history-left-vertical">
                             <div class="history-meta">
                                 <span class="history-date">{{ item.date|date:"m/d" }}</span>

@@ -45,7 +45,7 @@
 
                         <select name="category" id="living-category-select" required>
                             <option value="expense">지출</option>
-                            <option value="income">입금</option>                            
+                            <option value="income">입금</option>
                             <option value="emergency">비상금</option>
                             <option value="cash">현금</option>
                         </select>
@@ -110,6 +110,12 @@
                             <span class="quick-label">현금 쓰기</span>
                         </button>
 
+                        <button type="button"
+                                class="quick-input-btn"
+                                onclick="applyLivingQuickInput('emergency','비상금 직접입금','-','')">
+                            <span class="quick-icon">🩶</span>
+                            <span class="quick-label">비상금 직접입금</span>
+                        </button>
                     </div>
                 </div>
             </section>
@@ -117,10 +123,20 @@
             <!-- 2단 -->
             <section class="column column-center">
                 <div class="summary-card living-history-card">
-                    <h3>📂 전체 거래 내역</h3>
+                    <div class="history-header-row">
+                        <h3>📋 전체 거래 내역</h3>
+                        <select id="living_history_filter" class="history-filter-select">
+                            <option value="all">🌈 전체</option>
+                            <option value="income">💙 입금</option>
+                            <option value="expense">💗 지출</option>
+                            <option value="emergency">💛 비상금</option>
+                            <option value="cash">💚 현금</option>
+                        </select>
+                    </div>
+                    <p class="history-filter-empty" id="living_history_empty" style="display:none;">조건에 맞는 내역이 없어요.</p>
 
                     {% for item in history %}
-                    <div class="living-history-item">
+                     <div class="living-history-item" data-filter-type="{% if item.category == 'income' %}income{% elif item.category == 'expense' %}expense{% elif item.detail_category|slice:':3' == '비상금' %}emergency{% elif item.detail_category|slice:':2' == '현금' %}cash{% else %}other{% endif %}">
                         <div class="living-history-left">
                             <div class="living-history-meta">
                                 <span class="history-date-pill">{{ item.date|date:"m/d" }}</span>
@@ -428,6 +444,6 @@
     {{ rent_chart_labels_json|json_script:"living-rent-labels" }}
     {{ rent_chart_values_json|json_script:"living-rent-values" }}
 
-    <script src="{% static 'account/js/script.js' %}?v=6"></script>
+    <script src="{% static 'account/js/script.js' %}?v=7"></script>
 </body>
 </html>

@@ -18,7 +18,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-secret-key")
 DEBUG = os.environ.get("DEBUG", "True") == "True"
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS",
+    "127.0.0.1,localhost,192.168.4.17"
+).split(",")
 SIMPLE_LOGIN_PASSWORD = os.environ.get("SIMPLE_LOGIN_PASSWORD", "0000")
 
 # Application definition

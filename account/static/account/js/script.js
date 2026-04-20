@@ -577,6 +577,30 @@ function applyLivingQuickInput(category, detailCategory, description, amount = "
         amountInput.value = amount || "";
         amountInput.focus();
     }
+
+    if (type === 'emergency_direct') {
+
+        // 1. 카테고리 먼저 변경
+        categorySelect.value = 'emergency';
+
+        // 2. change 이벤트 강제 실행 (옵션 채우는 로직 트리거)
+        categorySelect.dispatchEvent(new Event('change'));
+
+        // 3. 약간 딜레이 후 값 넣기 (중요)
+        setTimeout(() => {
+            detailSelect.value = '비상금 직접입금';
+        }, 0);
+    }
+
+    else if (type === 'emergency') {
+
+        categorySelect.value = 'emergency';
+        categorySelect.dispatchEvent(new Event('change'));
+
+        setTimeout(() => {
+            detailSelect.value = label;
+        }, 0);
+    }
 }
 
 // =========================
@@ -771,4 +795,39 @@ if (rentLabels.length && rentValues.length) {
 document.addEventListener("DOMContentLoaded", function () {
     initDonutChart();
     initRentChart();
+});
+
+// ===== 거래 내역 필터 =====
+document.addEventListener("DOMContentLoaded", function () {
+    // 생활비 통장 필터
+    const livingFilter = document.getElementById("living_history_filter");
+    if (livingFilter) {
+        livingFilter.addEventListener("change", function () {
+            const val = this.value;
+            const items = document.querySelectorAll(".living-history-item");
+            let visible = 0;
+            items.forEach(el => {
+                const show = (val === "all" || el.dataset.filterType === val);
+                el.style.display = show ? "" : "none";
+                if (show) visible++;
+            });
+            document.getElementById("living_history_empty").style.display = visible ? "none" : "block";
+        });
+    }
+
+    // 메인 가계부 필터
+    const mainFilter = document.getElementById("main_history_filter");
+    if (mainFilter) {
+        mainFilter.addEventListener("change", function () {
+            const val = this.value;
+            const items = document.querySelectorAll(".history-row[data-filter-account]");
+            let visible = 0;
+            items.forEach(el => {
+                const show = (val === "all" || el.dataset.filterAccount === val);
+                el.style.display = show ? "" : "none";
+                if (show) visible++;
+            });
+            document.getElementById("main_history_empty").style.display = visible ? "none" : "block";
+        });
+    }
 });

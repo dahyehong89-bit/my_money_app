@@ -129,7 +129,7 @@ def index(request):
     check_total_amount = sum(item.amount for item in checklist_items)
     check_done_amount = sum(item.amount for item in checklist_items if item.is_completed)
 
-    history = month_transactions.order_by('-date', '-created_at')[:10]
+    history = month_transactions.order_by('-date', '-created_at')
     fuel_list = month_transactions.filter(
         is_fuel=True,
         detail_category='주유'
@@ -343,6 +343,8 @@ def living(request):
                 amount = abs(amount)
             elif detail_category == "비상금 빼기":
                 amount = -abs(amount)
+            elif detail_category == "비상금 직접입금":
+                amount = abs(amount)  
 
         elif selected_type == "cash":
             category = "non_expense"
@@ -409,7 +411,7 @@ def living(request):
     # 전달 비상금 / 현금 변동
     prev_emergency = prev_transactions.filter(
         category="non_expense",
-        detail_category__startswith="비상금"
+        detail_category__in=["비상금 넣기", "비상금 빼기"]
     ).aggregate(
         Sum("amount")
     )["amount__sum"] or 0
@@ -434,10 +436,18 @@ def living(request):
         Sum("amount")
     )["amount__sum"] or 0
 
-    # 이번 달 비상금 / 현금 변동
+    # 이번 달 비상금 이동 (내 돈 이동만)
     month_emergency = month_transactions.filter(
         category="non_expense",
-        detail_category__startswith="비상금"
+        detail_category__in=["비상금 넣기", "비상금 빼기"]
+    ).aggregate(
+        Sum("amount")
+    )["amount__sum"] or 0
+
+    # 이번 달 비상금 직접입금 (이자, 외부돈)
+    emergency_direct_total = month_transactions.filter(
+        category="non_expense",
+        detail_category="비상금 직접입금"
     ).aggregate(
         Sum("amount")
     )["amount__sum"] or 0
@@ -596,6 +606,8 @@ def living(request):
         "rent_chart_values_json": rent_values,
 
         "living_category_map_json": LIVING_CATEGORY_MAP,
+
+        "emergency_direct_total": emergency_direct_total,
     }
 
     return render(request, "account/living.html", context)
