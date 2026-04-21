@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from collections import defaultdict
 from django.utils import timezone
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from .models import Transaction, CheckList
 from .category_config import (
     DETAIL_CATEGORY_OPTIONS,
@@ -208,21 +208,34 @@ def index(request):
     category_summary = defaultdict(int)
     category_detail_map = defaultdict(list)
 
-    for item in month_transactions.filter(category='expense').order_by('-date', '-created_at'):
+    # ✅ 지출 + 환급(입금 중 내역에 "환급" 포함된 것) 둘 다 가져오기
+    target_items = month_transactions.filter(
+        Q(category='expense') |
+        Q(category='income', description__icontains='환급')
+    ).order_by('-date', '-created_at')
+
+    for item in target_items:
         category_name = item.detail_category or "기타"
 
-        if item.amount > 0:   # ✅ 지출
+        # ✅ 환급 판별: 입금(income)이면 환급으로 처리
+        is_refund = (item.category == 'income')
+
+        if is_refund:
+            total_refund += abs(item.amount)
+            # 환급은 카테고리 총지출에서도 차감 (순지출 반영)
+            category_summary[category_name] -= abs(item.amount)
+        else:
             total_expense += item.amount
             category_summary[category_name] += item.amount
-        else:  # ✅ 환급
-            total_refund += abs(item.amount)
 
         category_detail_map[category_name].append({
             'date': item.date.strftime('%m/%d'),
             'account_type': item.get_account_type_display(),
             'description': item.description,
             'amount': abs(item.amount),
+            'is_refund': is_refund,
         })
+
     category_summary = dict(
         sorted(category_summary.items(), key=lambda x: x[1], reverse=True)
     )
