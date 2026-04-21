@@ -202,12 +202,20 @@ def index(request):
     if hyundai_percent > 100:
         hyundai_percent = 100
 
+    total_expense = 0
+    total_refund = 0
+
     category_summary = defaultdict(int)
     category_detail_map = defaultdict(list)
 
     for item in month_transactions.filter(category='expense').order_by('-date', '-created_at'):
         category_name = item.detail_category or "기타"
-        category_summary[category_name] += abs(item.amount)
+
+        if item.amount > 0:   # ✅ 지출
+            total_expense += item.amount
+            category_summary[category_name] += item.amount
+        else:  # ✅ 환급
+            total_refund += abs(item.amount)
 
         category_detail_map[category_name].append({
             'date': item.date.strftime('%m/%d'),
@@ -215,7 +223,6 @@ def index(request):
             'description': item.description,
             'amount': abs(item.amount),
         })
-
     category_summary = dict(
         sorted(category_summary.items(), key=lambda x: x[1], reverse=True)
     )
@@ -270,6 +277,10 @@ def index(request):
         'shinhan_grouped': shinhan_grouped,
         'incident_grouped': incident_grouped,
         'cash_transfer_grouped': cash_transfer_grouped,
+
+        'total_expense': total_expense,
+        'total_refund': total_refund,
+        'net_expense': total_expense - total_refund,
     }
 
     return render(request, 'account/index.html', context)

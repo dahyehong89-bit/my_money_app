@@ -236,6 +236,24 @@
                     </div>
                 </div>
                 <div class="summary-card">
+                    <div class="summary-top">
+                        <div class="summary-box expense">
+                            <div class="label">총 지출</div>
+                            <div class="value">{{ total_expense|intcomma }}원</div>
+                        </div>
+
+                        <div class="summary-box refund">
+                            <div class="label">환급</div>
+                            <div class="value">{{ total_refund|intcomma }}원</div>
+                        </div>
+
+                        <div class="summary-box net">
+                            <div class="label">순지출</div>
+                            <div class="value">{{ net_expense|intcomma }}원</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="summary-card">                    
                     <h3>📊 카테고리 총 지출</h3>
 
                     {% for item in category_summary_list %}

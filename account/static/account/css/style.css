@@ -2552,6 +2552,45 @@ body:not(.living-page) .history-actions a.danger:hover {
     font-size: 0.95rem;
 }
 
+.summary-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.summary-box {
+    flex: 1;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.summary-box .label {
+    font-size: 12px;
+    color: #999;
+}
+
+.summary-box .value {
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 4px;
+}
+
+.summary-box.expense .value {
+    color: #ff5c5c;
+}
+
+.summary-box.refund .value {
+    color: #4caf50;
+}
+
+.summary-box.net .value {
+    color: #333;
+}
+
 /* ==============================================================
    🎨 태그 / 카테고리 색상 모음 (한 곳에 몰아놓기)
    - 메인 가계부 카드사 태그
