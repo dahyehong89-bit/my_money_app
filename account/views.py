@@ -4,12 +4,15 @@ from collections import defaultdict
 from django.utils import timezone
 from django.db.models import Sum, Q
 from .models import Transaction, CheckList
+from .category_config import DETAIL_CATEGORY_CHOICES
 from .category_config import (
     DETAIL_CATEGORY_OPTIONS,
     CATEGORY_ICON_MAP,
     DEFAULT_CHECKLIST_ITEMS,
     HYUNDAI_MONTHLY_BUDGET,
     LIVING_CATEGORY_MAP,
+    MAIN_EXPENSE_CATEGORIES,
+    MAIN_INCOME_CATEGORIES,
 )
 from datetime import date
 from calendar import monthrange
@@ -203,37 +206,42 @@ def index(request):
         hyundai_percent = 100
 
     total_expense = 0
-    total_refund = 0
+    total_inflow = 0
+    total_refund_only = 0
 
     category_summary = defaultdict(int)
     category_detail_map = defaultdict(list)
 
-    # ✅ 지출 + 환급(입금 중 내역에 "환급" 포함된 것) 둘 다 가져오기
     target_items = month_transactions.filter(
         Q(category='expense') |
-        Q(category='income', description__icontains='환급')
+        Q(category='income')
     ).order_by('-date', '-created_at')
 
     for item in target_items:
         category_name = item.detail_category or "기타"
+        is_inflow = (item.category == 'income')
 
-        # ✅ 환급 판별: 입금(income)이면 환급으로 처리
-        is_refund = (item.category == 'income')
+        amount = abs(item.amount)
 
-        if is_refund:
-            total_refund += abs(item.amount)
-            # 환급은 카테고리 총지출에서도 차감 (순지출 반영)
-            category_summary[category_name] -= abs(item.amount)
+        if is_inflow:
+            total_inflow += amount
+
+            if '환급' in (item.detail_category or ''):
+                total_refund_only += amount
+
+            # ❌ continue 제거 (이게 핵심)
         else:
-            total_expense += item.amount
-            category_summary[category_name] += item.amount
+            total_expense += amount
+
+        # 🔥 카테고리에는 둘 다 넣되 금액은 항상 양수
+        category_summary[category_name] += amount
 
         category_detail_map[category_name].append({
             'date': item.date.strftime('%m/%d'),
             'account_type': item.get_account_type_display(),
             'description': item.description,
-            'amount': abs(item.amount),
-            'is_refund': is_refund,
+            'amount': amount,
+            'is_inflow': is_inflow,
         })
 
     category_summary = dict(
@@ -249,6 +257,29 @@ def index(request):
         })
 
     category_detail_map = dict(category_detail_map)
+
+    category_map = {
+        "expense": [],
+        "income": [],
+    }
+
+    # 중복 방지용 set
+    seen = {"expense": set(), "income": set()}
+
+    for value, label in DETAIL_CATEGORY_CHOICES:
+        icon = CATEGORY_ICON_MAP.get(value, "")
+        item = {"value": value, "label": f"{icon} {label}"}
+
+        if value in MAIN_EXPENSE_CATEGORIES and value not in seen["expense"]:
+            category_map["expense"].append(item)
+            seen["expense"].add(value)
+
+        if value in MAIN_INCOME_CATEGORIES and value not in seen["income"]:
+            category_map["income"].append(item)
+            seen["income"].add(value)
+
+    # 비지출은 지출이랑 동일한 카테고리 사용
+    category_map["non_expense"] = category_map["expense"]
 
     context = {
         'today': today,
@@ -272,7 +303,8 @@ def index(request):
         'category_detail_map': category_detail_map,
         'category_icon_map': CATEGORY_ICON_MAP,
 
-        'detail_category_options': DETAIL_CATEGORY_OPTIONS,
+        'DETAIL_CATEGORY_OPTIONS': json.dumps(DETAIL_CATEGORY_OPTIONS),
+        'CATEGORY_MAP_JSON': json.dumps(category_map, ensure_ascii=False),
 
         'fuel_labels': json.dumps(fuel_labels),
         'fuel_prices': json.dumps(fuel_prices),
@@ -292,8 +324,8 @@ def index(request):
         'cash_transfer_grouped': cash_transfer_grouped,
 
         'total_expense': total_expense,
-        'total_refund': total_refund,
-        'net_expense': total_expense - total_refund,
+        'total_inflow': total_inflow,
+        'net_expense': total_expense - total_refund_only
     }
 
     return render(request, 'account/index.html', context)

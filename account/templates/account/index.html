@@ -63,9 +63,10 @@
 
                         <input type="number" name="amount" id="ui_amount" placeholder="금액" required>
 
-                        <label class="fuel-check">
+                        <label class="fuel-check-wrap">
                             <input type="checkbox" name="is_fuel" id="ui_is_fuel" onchange="toggleFuelInput()">
-                            주유 항목
+                            <span class="checkmark"></span>
+                            <span class="label-text">주유 항목</span>
                         </label>
 
                         <div id="ui_fuel_section" style="display:none;">
@@ -243,8 +244,8 @@
                         </div>
 
                         <div class="summary-box refund">
-                            <div class="label">환급</div>
-                            <div class="value">{{ total_refund|intcomma }}원</div>
+                            <div class="label">유입금</div>
+                            <div class="value">{{ total_inflow|intcomma }}원</div>
                         </div>
 
                         <div class="summary-box net">
@@ -574,7 +575,7 @@
                         <select name="category" id="main_edit_category" class="modal-input" required>
                             <option value="expense">지출</option>
                             <option value="income">입금</option>
-                            <option value="non_expense">비지출/이동</option>
+                            <option value="non_expense">비지출</option>
                         </select>
                     </div>
 
@@ -598,9 +599,10 @@
                     </div>
 
                     <div>
-                        <label class="fuel-check">
-                            <input type="checkbox" name="is_fuel" id="main_edit_is_fuel">
-                            주유 항목
+                        <label class="fuel-check-wrap">
+                            <input type="checkbox" id="main_edit_is_fuel">
+                            <span class="checkmark"></span>
+                            <span class="label-text">주유 항목</span>
                         </label>
                     </div>
 
@@ -621,6 +623,7 @@
     <script id="fuel_labels_data" type="application/json">{{ fuel_labels|safe }}</script>
     <script id="fuel_prices_data" type="application/json">{{ fuel_prices|safe }}</script>
     {{ category_detail_map|json_script:"category-detail-data" }}
+    <script id="category-map-data" type="application/json">{{ CATEGORY_MAP_JSON|safe }}</script>
 
     <script src="{% static 'account/js/script.js' %}?v=5"></script>
 </body>

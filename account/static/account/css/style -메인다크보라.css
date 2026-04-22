@@ -2753,3 +2753,620 @@ body:not(.living-page) .history-actions a.danger:hover {
 /* 현금 */
 .living-page .tag-detail.cat-현금넣기        { background: #d4f5dc !important; color: #2e8b57 !important; }
 .living-page .tag-detail.cat-현금쓰기        { background: #c8ebd0 !important; color: #256a43 !important; }
+
+
+/* ==============================================================
+   🌙 메인 가계부 다크 테마
+   - body.main-page 일 때만 적용
+   - 보라 포인트 + 부드러운 네이비 배경
+============================================================== */
+body.main-page {
+    /* ---- 전체 배경 강제 ---- */
+    background-color: #1a1a2e !important;
+    color: #e4e4f0 !important;
+
+    /* ---- 테마 변수 덮어쓰기 ---- */
+    --theme-primary:        #8b7fd9;
+    --theme-primary-hover:  #a594f9;
+    --theme-accent:         #d4a5ff;                      /* 강조 (연보라) */
+    --theme-accent-hover:   #e0b8ff;
+    --theme-soft:           #3a3a5e;                      /* 카드 배경 */
+    --theme-line:           #505077;                      /* 테두리 */
+    --theme-text:           #e4e4f0;                      /* 본문 글자 */
+    --theme-bg:             #1a1a2e;                      /* 페이지 배경 */
+    --theme-shadow:         rgba(139, 127, 217, 0.4);
+    --theme-shadow-soft:    rgba(139, 127, 217, 0.15);
+
+    /* ---- 다크 전용 추가 변수 ---- */
+    --dark-card:            #232338;
+    --dark-card-hover:      #2a2a42;
+    --dark-border:          #2e2e4a;
+    --dark-subtext:         #9a9ab8;
+    --dark-income:          #7fd9a5;                      /* 입금 민트 */
+    --dark-expense:         #ff8ba7;                      /* 지출 핑크 */
+    --dark-input-bg:        #2a2a42;
+}
+
+/* ==== 하드코딩된 밝은 배경들 다크로 덮어쓰기 ==== */
+body.main-page .history-wrapper,
+body.main-page .summary-card,
+body.main-page .history-row,
+body.main-page details.category-section,
+body.main-page details.category-section[open],
+body.main-page .checklist-wrapper,
+body.main-page .fuel-card,
+body.main-page .category-detail-row {
+    background: var(--dark-card) !important;
+    color: var(--theme-text);
+}
+
+body.main-page .history-row:hover,
+body.main-page .category-detail-row:hover {
+    background: var(--dark-card-hover) !important;
+}
+
+/* 구분선 */
+body.main-page .history-row,
+body.main-page details.category-section,
+body.main-page .checklist-item,
+body.main-page .category-detail-row {
+    border-color: var(--dark-border) !important;
+}
+
+/* 서브 텍스트 */
+body.main-page .text-muted,
+body.main-page .history-date,
+body.main-page .sub-label,
+body.main-page .history-filter-empty {
+    color: var(--dark-subtext) !important;
+}
+
+/* ==== input / select / textarea 다크 ==== */
+body.main-page input,
+body.main-page select,
+body.main-page textarea {
+    background-color: var(--dark-input-bg) !important;
+    color: var(--theme-text) !important;
+    border-color: var(--dark-border) !important;
+    -webkit-text-fill-color: var(--theme-text) !important;
+}
+
+body.main-page input::placeholder,
+body.main-page textarea::placeholder {
+    color: var(--dark-subtext) !important;
+}
+
+/* select 화살표 보라로 교체 */
+body.main-page select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%238b7fd9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+}
+
+/* 자동완성 노란 배경 방지 */
+body.main-page input:-webkit-autofill,
+body.main-page input:-webkit-autofill:hover,
+body.main-page input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--dark-input-bg) inset !important;
+    -webkit-text-fill-color: var(--theme-text) !important;
+}
+
+/* disabled input */
+body.main-page input:disabled {
+    background-color: #1f1f35 !important;
+    color: var(--dark-subtext) !important;
+}
+
+/* ==== 금액 색상 (입금/지출) ==== */
+body.main-page .amount-income,
+body.main-page .income-amount {
+    color: var(--dark-income) !important;
+}
+
+body.main-page .amount-expense,
+body.main-page .expense-amount {
+    color: var(--dark-expense) !important;
+}
+
+/* ==== 버튼 ==== */
+body.main-page button,
+body.main-page .btn {
+    box-shadow: 0 2px 8px var(--theme-shadow-soft);
+}
+
+body.main-page button:hover,
+body.main-page .btn:hover {
+    background: var(--theme-primary-hover);
+}
+
+/* ==== 프로그레스 바 ==== */
+body.main-page .progress-bar {
+    background: #2e2e4a !important;
+}
+
+body.main-page .progress-fill {
+    background: linear-gradient(90deg, #8b7fd9, #d4a5ff) !important;
+}
+
+/* ==== 스크롤바 ==== */
+body.main-page ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+body.main-page ::-webkit-scrollbar-track {
+    background: var(--theme-bg);
+}
+body.main-page ::-webkit-scrollbar-thumb {
+    background: var(--dark-border);
+    border-radius: 4px;
+}
+body.main-page ::-webkit-scrollbar-thumb:hover {
+    background: var(--theme-primary);
+}
+
+/* ==== 수정/삭제 버튼 연보라 통일 ==== */
+body.main-page .btn-edit,
+body.main-page .btn-delete,
+body.main-page .edit-btn,
+body.main-page .delete-btn,
+body.main-page .history-row button,
+body.main-page .category-detail-row button {
+    background: #a594f9 !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 2px 6px rgba(165, 148, 249, 0.25) !important;
+    transition: all 0.2s ease;
+}
+
+body.main-page .btn-edit:hover,
+body.main-page .btn-delete:hover,
+body.main-page .edit-btn:hover,
+body.main-page .delete-btn:hover,
+body.main-page .history-row button:hover,
+body.main-page .category-detail-row button:hover {
+    background: #8b7fd9 !important;
+    box-shadow: 0 3px 10px rgba(139, 127, 217, 0.4) !important;
+    transform: translateY(-1px);
+}
+
+/* 삭제 버튼은 살짝 구분 (아웃라인 스타일) */
+body.main-page .btn-delete,
+body.main-page .delete-btn {
+    background: transparent !important;
+    color: #d4a5ff !important;
+    border: 1.5px solid #a594f9 !important;
+    box-shadow: none !important;
+}
+
+body.main-page .btn-delete:hover,
+body.main-page .delete-btn:hover {
+    background: rgba(165, 148, 249, 0.15) !important;
+    color: #e0b8ff !important;
+}
+
+/* ==== 메인 제출/조회 버튼도 연보라로 ==== */
+body.main-page .btn-submit,
+body.main-page .btn-search,
+body.main-page form button[type="submit"] {
+    background: linear-gradient(135deg, #8b7fd9, #a594f9) !important;
+    color: #ffffff !important;
+    box-shadow: 0 3px 12px rgba(139, 127, 217, 0.35) !important;
+}
+
+body.main-page .btn-submit:hover,
+body.main-page .btn-search:hover,
+body.main-page form button[type="submit"]:hover {
+    background: linear-gradient(135deg, #a594f9, #d4a5ff) !important;
+    box-shadow: 0 4px 16px rgba(165, 148, 249, 0.45) !important;
+}
+
+/* ==== 점선 테두리 박스들 다크로 ==== */
+body.main-page [style*="dashed"],
+body.main-page .dashed-box,
+body.main-page .summary-card,
+body.main-page .fuel-card,
+body.main-page .checklist-wrapper,
+body.main-page details,
+body.main-page .account-detail-item,
+body.main-page .quick-btn-wrapper,
+body.main-page .quick-input-wrapper {
+    border-color: var(--dark-border) !important;
+}
+
+/* ==== 빠른입력 버튼들 (흰색 배경 → 다크) ==== */
+body.main-page .quick-btn,
+body.main-page .quick-input-btn,
+body.main-page .shinhan-quick-btn,
+body.main-page .quick-expense-btn,
+body.main-page button.outline,
+body.main-page .btn-outline {
+    background: var(--dark-input-bg) !important;
+    color: var(--theme-text) !important;
+    border: 1px solid var(--dark-border) !important;
+    box-shadow: none !important;
+}
+
+body.main-page .quick-btn:hover,
+body.main-page .quick-input-btn:hover,
+body.main-page .shinhan-quick-btn:hover,
+body.main-page .quick-expense-btn:hover,
+body.main-page button.outline:hover,
+body.main-page .btn-outline:hover {
+    background: var(--dark-card-hover) !important;
+    border-color: var(--theme-primary) !important;
+    color: var(--theme-accent) !important;
+}
+
+/* ==== 카테고리 칩/태그 (외식/주유/통신비/신한카드 등) ==== */
+body.main-page .tag,
+body.main-page .category-tag,
+body.main-page .account-tag,
+body.main-page .detail-tag,
+body.main-page .chip,
+body.main-page .badge,
+body.main-page .label-tag,
+body.main-page .history-row span[class*="tag"],
+body.main-page .history-row span[class*="badge"],
+body.main-page .history-row .account-label,
+body.main-page .history-row .category-label {
+    background: rgba(139, 127, 217, 0.18) !important;
+    color: #d4a5ff !important;
+    border: 1px solid rgba(139, 127, 217, 0.3) !important;
+}
+
+/* ==== 삭제 버튼 확실하게 잡기 ==== */
+body.main-page button[onclick*="delete"],
+body.main-page button[onclick*="삭제"],
+body.main-page a[onclick*="delete"],
+body.main-page form[action*="delete"] button,
+body.main-page .btn-danger {
+    background: transparent !important;
+    color: #d4a5ff !important;
+    border: 1.5px solid #a594f9 !important;
+    box-shadow: none !important;
+}
+
+body.main-page button[onclick*="delete"]:hover,
+body.main-page button[onclick*="삭제"]:hover,
+body.main-page a[onclick*="delete"]:hover,
+body.main-page form[action*="delete"] button:hover,
+body.main-page .btn-danger:hover {
+    background: rgba(165, 148, 249, 0.15) !important;
+    color: #e0b8ff !important;
+}
+
+/* 카드 내부 행들 - 배경 투명, 구분선만 살짝 */
+body.main-page .history-row,
+body.main-page details.category-section,
+body.main-page details.category-section[open],
+body.main-page .category-detail-row {
+    background: transparent !important;
+    color: var(--theme-text);
+    border: none !important;
+    border-bottom: 1px solid rgba(139, 127, 217, 0.4) !important;  /* 아주 은은한 보라 구분선 */
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 14px 8px !important;  /* 숨통 트이게 상하 여백 */
+}
+
+/* 마지막 행은 구분선 제거 */
+body.main-page .history-row:last-child,
+body.main-page .category-detail-row:last-child {
+    border-bottom: none !important;
+}
+
+/* hover 시 은은하게 */
+body.main-page .history-row:hover,
+body.main-page .category-detail-row:hover {
+    background: rgba(139, 127, 217, 0.18) !important;
+    border-radius: 8px !important;
+    border-bottom-color: transparent !important;
+}
+
+/* ==== 카드 경계 명확하게 ==== */
+body.main-page .summary-card,
+body.main-page .history-wrapper,
+body.main-page .checklist-wrapper,
+body.main-page .fuel-card,
+body.main-page .living-nav-card {
+    border: 1px solid #3a3a5a !important;           /* 기존보다 밝은 보더 */
+    box-shadow: 
+        0 2px 12px rgba(0, 0, 0, 0.3),              /* 바깥 그림자 */
+        inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;  /* 안쪽 살짝 하이라이트 */
+    border-radius: 14px !important;
+}
+
+/* hover 시 카드 더 살짝 뜨게 */
+body.main-page .summary-card:hover,
+body.main-page .fuel-card:hover {
+    border-color: #4a4a6e !important;
+    box-shadow: 
+        0 4px 20px rgba(139, 127, 217, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    transition: all 0.25s ease;
+}
+
+/* ==== 카드 간 구분을 위한 배경 약간 차별화 ==== */
+body.main-page .summary-card,
+body.main-page .history-wrapper,
+body.main-page .checklist-wrapper,
+body.main-page .fuel-card {
+    background: #3a3a5e !important;
+    border: 1px solid #505077 !important;
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+/* hover 시 살짝 밝아짐 */
+body.main-page .summary-card:hover,
+body.main-page .fuel-card:hover {
+    background: #44446c !important;
+    border-color: #8b7fd9 !important;
+    box-shadow: 
+        0 6px 24px rgba(139, 127, 217, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ==== 섹션 헤더 영역 구분선 ==== */
+body.main-page .summary-card h3,
+body.main-page .history-wrapper h3 {
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(139, 127, 217, 0.2);
+    margin-bottom: 12px;
+}
+
+/* ============================================
+   🌙 다크 테마 마감 - 전체 핑크 잔재 제거
+============================================ */
+
+/* ==== 1. 모든 제목(h1~h4) 연보라 통일 ==== */
+body.main-page h1,
+body.main-page h2,
+body.main-page h3,
+body.main-page h4,
+body.main-page h5,
+body.main-page .page-title-wrap,
+body.main-page .page-title-wrap *,
+body.main-page [class*="title"],
+body.main-page [class*="Title"] {
+    color: #d4a5ff !important;
+}
+
+/* 타이틀 옆 이모지까지 같이 보라빛 안 되게 이모지는 원래색 유지 */
+body.main-page h1,
+body.main-page h2,
+body.main-page h3 {
+    text-shadow: none !important;
+}
+
+/* ==== 2. 큰 강조 숫자들 (60,000원 사용 같은) ==== */
+body.main-page .big-number,
+body.main-page .main-amount,
+body.main-page .summary-amount,
+body.main-page .budget-amount,
+body.main-page .card-main-value,
+body.main-page .summary-card strong,
+body.main-page .summary-card b,
+body.main-page .summary-card [class*="amount"],
+body.main-page .summary-card [class*="total"],
+body.main-page .summary-card [class*="used"] {
+    color: #e0b8ff !important;
+}
+
+/* ==== 3. 내역 행의 칩/태그들 전부 보라톤으로 ==== */
+body.main-page .history-row span,
+body.main-page .history-row small,
+body.main-page .history-row em,
+body.main-page .history-row b,
+body.main-page .history-row [class*="tag"],
+body.main-page .history-row [class*="badge"],
+body.main-page .history-row [class*="chip"],
+body.main-page .history-row [class*="label"],
+body.main-page .history-row [class*="category"],
+body.main-page .history-row [class*="account"] {
+    background: rgba(139, 127, 217, 0.25) !important;
+    color: #d4a5ff !important;
+    border: 1px solid rgba(139, 127, 217, 0.55) !important;
+}
+
+/* 단, 금액(+100,000원 같은거)은 칩 아니니까 배경 빼기 */
+body.main-page .history-row .amount,
+body.main-page .history-row [class*="amount"],
+body.main-page .history-row .price,
+body.main-page .history-row [class*="price"] {
+    background: transparent !important;
+    border: none !important;
+}
+
+/* ==== 4. 입금/지출 금액 색상 재조정 ==== */
+body.main-page .income,
+body.main-page [class*="income"]:not(select):not(option),
+body.main-page .plus,
+body.main-page .amount-plus {
+    color: #7fd9a5 !important;   /* 민트 - 입금 */
+}
+
+body.main-page .expense,
+body.main-page [class*="expense"]:not(select):not(option):not(table):not(tr):not(td),
+body.main-page .minus,
+body.main-page .amount-minus {
+    color: #ff8ba7 !important;   /* 핑크 - 지출 */
+}
+
+/* ==== 5. 빠른입력 버튼 다시 강력하게 ==== */
+body.main-page .quick-input-section button,
+body.main-page .quick-input-wrapper button,
+body.main-page [class*="quick"] button,
+body.main-page [class*="shinhan"] button:not([type="submit"]),
+body.main-page .shortcut-btn,
+body.main-page .preset-btn {
+    background: #2f2f50 !important;
+    color: #e4e4f0 !important;
+    border: 1px solid #505077 !important;
+    box-shadow: none !important;
+}
+
+body.main-page .quick-input-section button:hover,
+body.main-page .quick-input-wrapper button:hover,
+body.main-page [class*="quick"] button:hover,
+body.main-page [class*="shinhan"] button:not([type="submit"]):hover {
+    background: #3a3a5e !important;
+    border-color: #8b7fd9 !important;
+    color: #d4a5ff !important;
+}
+
+/* ==== 6. 카테고리 집계 리스트 아이템 ==== */
+body.main-page .category-summary-item,
+body.main-page .category-list-item,
+body.main-page [class*="category"] [class*="item"],
+body.main-page .summary-card li,
+body.main-page .summary-card .row {
+    background: #2f2f50 !important;
+    border-color: #505077 !important;
+    color: #e4e4f0 !important;
+}
+
+body.main-page .category-summary-item:hover,
+body.main-page .category-list-item:hover,
+body.main-page .summary-card li:hover {
+    background: #3a3a5e !important;
+}
+
+/* ==== 7. 레이블 텍스트(남은 금액:, 10% 사용 등) ==== */
+body.main-page .label,
+body.main-page .sub-label,
+body.main-page .hint,
+body.main-page small {
+    color: #b8b8d4 !important;
+}
+
+/* ==== 8. 체크박스 라벨/텍스트 ==== */
+body.main-page label {
+    color: #e4e4f0 !important;
+}
+
+/* ==== 9. 핑크 하드코딩된 색 전부 강제 덮기 (보험책) ==== */
+body.main-page [style*="#a35d63"],
+body.main-page [style*="#8a5a5a"],
+body.main-page [style*="#9a7a7d"],
+body.main-page [style*="#cf6b6b"],
+body.main-page [style*="#d26b6b"],
+body.main-page [style*="#ff8a93"],
+body.main-page [style*="#ff7d87"],
+body.main-page [style*="#b28b90"],
+body.main-page [style*="#7b5b5b"],
+body.main-page [style*="#b69a9a"] {
+    color: #d4a5ff !important;
+}
+
+/* ==== 10. 흰색 배경 강제 덮기 (보험책) ==== */
+body.main-page [style*="background: #fff"],
+body.main-page [style*="background-color: #fff"],
+body.main-page [style*="background:#fff"],
+body.main-page [style*="background:white"] {
+    background: #3a3a5e !important;
+    color: #e4e4f0 !important;
+}
+
+/* ==== 설명/서브 텍스트 다크 전환 ==== */
+body.main-page .sub-text {
+    color: #b8b8d4 !important;   /* 은은한 연보라빛 그레이 */
+}
+
+body.main-page .history-desc {
+    color: #d4d4e8 !important;   /* 본문에 가까운 밝기 (내역 설명은 중요하니까) */
+}
+
+/* ==== 주유 요약 줄 텍스트 ==== */
+body.main-page .fuel-summary-line span {
+    color: #d4d4e8 !important;
+}
+
+/* ==== 제목 밑줄 바 색상도 보라로 ==== */
+body.main-page .summary-card h3,
+body.main-page .history-wrapper h3 {
+    border-bottom-color: rgba(139, 127, 217, 0.4) !important;
+}
+
+/* ==== 내역 금액 색상 ==== */
+body.main-page .history-row .amount,
+body.main-page .history-row [class*="amount"],
+body.main-page .history-row [class*="price"],
+body.main-page .history-row strong {
+    color: #e4e4f0 !important;   /* 기본 본문 색 */
+}
+
+/* 입금(환급/용돈/정산 같은)은 민트로 */
+body.main-page .history-row.income .amount,
+body.main-page .history-row[data-type="income"] .amount,
+body.main-page .history-row [class*="income-amount"] {
+    color: #7fd9a5 !important;
+}
+
+/* ==== "60,000원 사용" 같은 큰 강조 숫자 - 확실하게 보라로 ==== */
+body.main-page .summary-card h2,
+body.main-page .summary-card .big,
+body.main-page .summary-card .big-number,
+body.main-page .summary-card strong[class*="amount"],
+body.main-page .summary-card > strong,
+body.main-page .summary-card p strong,
+body.main-page .summary-card div strong {
+    color: #d4a5ff !important;
+    font-size: inherit;
+}
+
+/* ==== 하단 통계 카드 (총 지출 / 유입금 / 순지출) ==== */
+body.main-page .stat-box,
+body.main-page .stats-row,
+body.main-page .summary-row,
+body.main-page .total-stats,
+body.main-page [class*="stat"] [class*="box"],
+body.main-page [class*="total"] [class*="card"] {
+    background: #2f2f50 !important;
+    border: 1px solid rgba(139, 127, 217, 0.4) !important;
+    color: #e4e4f0 !important;
+}
+
+body.main-page .stat-box *,
+body.main-page .stats-row *,
+body.main-page .summary-row *,
+body.main-page .total-stats * {
+    background: transparent !important;
+}
+
+/* 통계 숫자 - 총지출은 핑크(지출), 유입금은 민트, 순지출은 강조 */
+body.main-page [class*="total-expense"] strong,
+body.main-page [class*="expense-total"] strong {
+    color: #ff8ba7 !important;   /* 지출 - 다크 핑크 */
+}
+
+body.main-page [class*="inflow"] strong,
+body.main-page [class*="income-total"] strong {
+    color: #7fd9a5 !important;   /* 입금 - 민트 */
+}
+
+body.main-page [class*="net"] strong {
+    color: #d4a5ff !important;   /* 순지출 - 연보라 */
+}
+
+/* ==== 신한카드 빠른입력 버튼 (quick-fixed-btn) ==== */
+body.main-page .quick-fixed-btn {
+    background: #2f2f50 !important;
+    color: #e4e4f0 !important;
+    border: 1px solid #505077 !important;
+    box-shadow: none !important;
+}
+
+body.main-page .quick-fixed-btn:hover {
+    background: #3a3a5e !important;
+    border-color: #8b7fd9 !important;
+    color: #d4a5ff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(139, 127, 217, 0.25) !important;
+}
+
+body.main-page .quick-fixed-btn:active {
+    transform: translateY(0);
+}
+
+/* ==== 모달은 일단 제외 (다음 단계에서 작업) ==== */
+/* .modal-overlay, .modal-content 등은 밝은 테마 유지 */

@@ -354,6 +354,8 @@ function applyFixedModal() {
         document.getElementById("ui_category").value = "expense";
     }
 
+    document.getElementById("ui_category").dispatchEvent(new Event('change'));
+
     if (fixedDetailCategory) {
         document.getElementById("ui_detail_category").value = fixedDetailCategory.value;
     } else {
@@ -504,6 +506,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+
+    const editCategory = document.getElementById("main_edit_category");
+
+    if (editCategory) {
+        editCategory.addEventListener("change", function () {
+            updateDetailOptions("main_edit_detail", this.value);
+        });
+    }
+
+});
+
 // 메인 가계부 수정 모달 열기
 function openMainEditModal(pk, date, account, category, detail, description, amount, isFuel, price) {
     const modal = document.getElementById("mainEditModal");
@@ -516,22 +530,7 @@ function openMainEditModal(pk, date, account, category, detail, description, amo
     document.getElementById("main_edit_desc").value = description || "";
     document.getElementById("main_edit_amount").value = Math.abs(Number(amount));
 
-    // 상세 카테고리 선택
-    const detailSelect = document.getElementById("main_edit_detail");
-    if (detailSelect) {
-        // 옵션 중에 일치하는 게 있으면 선택
-        let found = false;
-        for (const opt of detailSelect.options) {
-            if (opt.value === detail) {
-                opt.selected = true;
-                found = true;
-                break;
-            }
-        }
-        if (!found && detailSelect.options.length > 0) {
-            detailSelect.selectedIndex = 0;
-        }
-    }
+    updateDetailOptions("main_edit_detail", category, detail);
 
     // 주유 체크
     const fuelCheck = document.getElementById("main_edit_is_fuel");
@@ -549,6 +548,65 @@ function openMainEditModal(pk, date, account, category, detail, description, amo
     }
 
     modal.style.display = "flex";
+}
+
+// =========================
+// 메인 가계부 category → detail 필터
+// =========================
+document.addEventListener("DOMContentLoaded", function () {
+    const categorySelect = document.getElementById('ui_category');
+    const detailSelect = document.getElementById('ui_detail_category');
+
+    if (!categorySelect || !detailSelect) return;
+
+    // 👉 Python에서 내려준 데이터
+    const detailCategoryDataEl = document.getElementById('category-map-data');
+    const detailCategoryMap = detailCategoryDataEl
+        ? JSON.parse(detailCategoryDataEl.textContent)
+        : {};
+
+    categorySelect.addEventListener('change', function () {
+        const selected = this.value;
+
+        detailSelect.innerHTML = '';
+
+        // 🔥 핵심: 이제 이걸 씀
+        const options = detailCategoryMap[selected] || [];
+
+        options.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.textContent = opt.label;
+            detailSelect.appendChild(option);
+        });
+    });
+
+    // 처음 실행
+    categorySelect.dispatchEvent(new Event('change'));
+});
+
+function updateDetailOptions(selectId, category, selectedValue = null) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+
+    const dataEl = document.getElementById('category-map-data');
+    const categoryMap = dataEl ? JSON.parse(dataEl.textContent) : {};
+
+    const options = categoryMap[category] || [];
+
+    select.innerHTML = '';
+
+    options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.textContent = opt.label;
+
+        if (selectedValue && selectedValue === opt.value) {
+            option.selected = true;
+        }
+
+        select.appendChild(option);
+    });
 }
 
 function applyLivingQuickInput(category, detailCategory, description, amount = "") {
