@@ -577,30 +577,6 @@ function applyLivingQuickInput(category, detailCategory, description, amount = "
         amountInput.value = amount || "";
         amountInput.focus();
     }
-
-    if (type === 'emergency_direct') {
-
-        // 1. 카테고리 먼저 변경
-        categorySelect.value = 'emergency';
-
-        // 2. change 이벤트 강제 실행 (옵션 채우는 로직 트리거)
-        categorySelect.dispatchEvent(new Event('change'));
-
-        // 3. 약간 딜레이 후 값 넣기 (중요)
-        setTimeout(() => {
-            detailSelect.value = '비상금 직접입금';
-        }, 0);
-    }
-
-    else if (type === 'emergency') {
-
-        categorySelect.value = 'emergency';
-        categorySelect.dispatchEvent(new Event('change'));
-
-        setTimeout(() => {
-            detailSelect.value = label;
-        }, 0);
-    }
 }
 
 // =========================
