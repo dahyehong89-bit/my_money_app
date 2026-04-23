@@ -469,7 +469,7 @@ button:hover {
 
 .history-desc {
     font-size: 1rem;
-    color: #9c8a57;
+    color: #666;
     line-height: 1.35;
     word-break: break-word;
     padding-left: 2px;
@@ -2639,7 +2639,7 @@ body:not(.living-page) .history-actions a.danger:hover {
 
 .summary-box .label {
     font-size: 12px;
-    color: #999;
+    color: #666;
 }
 
 .summary-box .value {

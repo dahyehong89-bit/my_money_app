@@ -254,24 +254,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="summary-card">                    
-                    <h3>📊 카테고리 총 지출</h3>
-
-                    {% for item in category_summary_list %}
-                    <div class="history-row category-summary-row"
-                        data-category="{{ item.name }}"
-                        onclick="openCategoryModal(this.dataset.category)">
-                        <div class="history-left">
-                            <span class="tag">{{ item.icon }} {{ item.name }}</span>
-                        </div>
-                        <div>
-                            <strong class="expense">{{ item.total|intcomma }}원</strong>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <p class="empty-text">지출 내역이 없습니다.</p>
-                    {% endfor %}
-                </div>
 
                 <div class="summary-card">
                     <h3>📊 카드/통장별 세부 내역</h3>
@@ -355,6 +337,25 @@
                             <p class="empty-text">내역 없음</p>
                         {% endfor %}
                     </details>
+                </div>
+
+                <div class="summary-card">                    
+                    <h3>📊 카테고리 총 지출</h3>
+
+                    {% for item in category_summary_list %}
+                    <div class="history-row category-summary-row"
+                        data-category="{{ item.name }}"
+                        onclick="openCategoryModal(this.dataset.category)">
+                        <div class="history-left">
+                            <span class="tag">{{ item.icon }} {{ item.name }}</span>
+                        </div>
+                        <div>
+                            <strong class="expense">{{ item.total|intcomma }}원</strong>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="empty-text">지출 내역이 없습니다.</p>
+                    {% endfor %}
                 </div>
 
                 <div class="summary-card">
