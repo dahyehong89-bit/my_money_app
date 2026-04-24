@@ -912,10 +912,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const rows = document.querySelectorAll(".main-history-row");
     const btn = document.getElementById("loadMoreBtn");
 
-    const SHOW_COUNT = 8;
-    let visibleCount = SHOW_COUNT;
+    if (!btn) return;
 
-    // 처음에는 5개만 보여주기
+    const SHOW_COUNT = 8;
+    let expanded = false;
+
+    // 처음에는 8개만 보여주기
     rows.forEach((row, index) => {
         if (index >= SHOW_COUNT) {
             row.classList.add("hidden");
@@ -923,13 +925,19 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     btn.addEventListener("click", () => {
-        const hiddenRows = document.querySelectorAll(".history-row.hidden");
+        expanded = !expanded;
 
-        hiddenRows.forEach(row => {
-            row.classList.remove("hidden");
+        rows.forEach((row, index) => {
+            if (index >= SHOW_COUNT) {
+                if (expanded) {
+                    row.classList.remove("hidden");
+                } else {
+                    row.classList.add("hidden");
+                }
+            }
         });
 
-        btn.style.display = "none";
+        btn.textContent = expanded ? "접기" : "더보기";
     });
 
     if (rows.length <= SHOW_COUNT) {
@@ -1048,5 +1056,33 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             });
         });
+    });
+});
+
+// =========================
+// 카테고리 총 지출 - 더보기/접기 토글
+// =========================
+document.addEventListener("DOMContentLoaded", function () {
+    const btn = document.getElementById("categoryToggleBtn");
+    if (!btn) return;
+
+    const rows = document.querySelectorAll(".category-summary-row");
+    const SHOW_COUNT = 5;
+    let expanded = false;
+
+    btn.addEventListener("click", () => {
+        expanded = !expanded;
+
+        rows.forEach((row, index) => {
+            if (index >= SHOW_COUNT) {
+                if (expanded) {
+                    row.classList.remove("category-hidden");
+                } else {
+                    row.classList.add("category-hidden");
+                }
+            }
+        });
+
+        btn.textContent = expanded ? "접기" : "더보기";
     });
 });

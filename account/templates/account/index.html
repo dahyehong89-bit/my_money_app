@@ -347,7 +347,8 @@
                     <h3>📊 카테고리 총 지출</h3>
 
                     {% for item in category_summary_list %}
-                    <div class="history-row category-summary-row"
+                    <div class="history-row category-summary-row
+                                {% if forloop.counter > 5 %}category-hidden{% endif %}"
                         data-category="{{ item.name }}"
                         onclick="openCategoryModal(this.dataset.category)">
                         <div class="history-left">
@@ -360,6 +361,10 @@
                     {% empty %}
                     <p class="empty-text">지출 내역이 없습니다.</p>
                     {% endfor %}
+
+                    {% if category_summary_list|length > 5 %}
+                    <button type="button" id="categoryToggleBtn" class="load-more-btn">더보기</button>
+                    {% endif %}
                 </div>
 
                 <div class="summary-card">

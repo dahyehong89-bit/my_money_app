@@ -517,6 +517,10 @@ button:hover {
     margin-top: 2px;
 }
 
+.category-summary-row.category-hidden {
+    display: none;
+}
+
 /* =========================
    금액 색상
 ========================= */
