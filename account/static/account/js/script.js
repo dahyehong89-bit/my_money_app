@@ -898,3 +898,110 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const rows = document.querySelectorAll(".history-row");
+    const btn = document.getElementById("loadMoreBtn");
+
+    const SHOW_COUNT = 8;
+    let visibleCount = SHOW_COUNT;
+
+    // 처음에는 5개만 보여주기
+    rows.forEach((row, index) => {
+        if (index >= SHOW_COUNT) {
+            row.classList.add("hidden");
+        }
+    });
+
+    btn.addEventListener("click", () => {
+        const hiddenRows = document.querySelectorAll(".history-row.hidden");
+
+        hiddenRows.forEach(row => {
+            row.classList.remove("hidden");
+        });
+
+        btn.style.display = "none";
+    });
+
+    if (rows.length <= SHOW_COUNT) {
+        btn.style.display = "none";
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const details = document.querySelector(".check-details");
+    const checkboxes = document.querySelectorAll(".check-form input[type='checkbox']");
+
+    // 체크 안된 게 하나라도 있는지 확인
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+    if (allChecked) {
+        details.removeAttribute("open"); // 닫기
+    }
+});
+
+function updateSummary() {
+    const items = document.querySelectorAll(".checklist-line");
+    let total = 0;
+    let done = 0;
+
+    items.forEach(item => {
+        const checkbox = item.querySelector("input");
+        const text = item.innerText;
+
+        const amountMatch = text.match(/([\d,]+)원/);
+        const amount = amountMatch ? Number(amountMatch[1].replace(/,/g, "")) : 0;
+
+        total += amount;
+
+        if (checkbox.checked) {
+            done += amount;
+        }
+    });
+
+    document.querySelector(".check-summary-title").innerText =
+        `완료 ${document.querySelectorAll(".check-form input:checked").length}/${items.length}`;
+
+    document.querySelector(".check-summary-amount").innerText =
+        `${done.toLocaleString()}원 / ${total.toLocaleString()}원`;
+}
+
+document.querySelectorAll(".check-form input[type='checkbox']").forEach(cb => {
+    cb.addEventListener("change", function () {
+
+        const form = this.closest("form");
+        const label = this.closest(".checklist-line");
+        const amount = parseInt(label.dataset.amount || 0);
+
+        const summary = document.getElementById("checkSummary");
+
+        let total = parseInt(summary.dataset.total || 0);
+        let done = parseInt(summary.dataset.done || 0);
+
+        // 👉 체크 상태에 따라 금액 증감
+        if (this.checked) {
+            done += amount;
+        } else {
+            done -= amount;
+        }
+
+        // 👉 화면 즉시 반영
+        summary.dataset.done = done;
+        summary.innerText = `${done.toLocaleString()}원 / ${total.toLocaleString()}원`;
+
+        // 👉 서버에도 저장
+        fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),
+            headers: {
+                "X-CSRFToken": form.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(() => {
+        updateSummary();
+    }, 0);
+});

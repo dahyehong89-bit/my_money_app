@@ -216,6 +216,8 @@
                     {% empty %}
                     <p class="empty-text">거래 내역이 없습니다.</p>
                     {% endfor %}
+
+                    <button id="loadMoreBtn" class="load-more-btn">더보기</button>
                 </div>
             </section>
 
@@ -258,8 +260,8 @@
                 <div class="summary-card">
                     <h3>📊 카드/통장별 세부 내역</h3>
 
-                    <details>
-                        <summary class="sum-hyundai">💳 현대카드 · {{ stats.hyundai|intcomma }}원</summary>
+                    <details class="sum-hyundai">
+                        <summary>💳 현대카드 · {{ stats.hyundai|intcomma }}원</summary>
                         {% for cat, items in hyundai_grouped.items %}
                             <details>
                                 <summary>{{ cat }} · {{ items|length }}건 · {{ items|sum_amount|intcomma }}원</summary>
@@ -278,8 +280,8 @@
                         {% endfor %}
                     </details>
 
-                    <details>
-                        <summary class="sum-shinhan">🏦 신한카드 · {{ stats.shinhan|intcomma }}원</summary>
+                    <details class="sum-shinhan">
+                        <summary>🏦 신한카드 · {{ stats.shinhan|intcomma }}원</summary>
                         {% for cat, items in shinhan_grouped.items %}
                             <details>
                                 <summary>{{ cat }} · {{ items|length }}건 · {{ items|sum_amount|intcomma }}원</summary>
@@ -298,8 +300,8 @@
                         {% endfor %}
                     </details>
 
-                    <details>
-                        <summary class="sum-incident">🏥 사건비통장 · {{ stats.incident|intcomma }}원</summary>
+                    <details class="sum-incident">
+                        <summary>🏥 사건비통장 · {{ stats.incident|intcomma }}원</summary>
                         {% for cat, items in incident_grouped.items %}
                             <details>
                                 <summary>{{ cat }} · {{ items|length }}건 · {{ items|sum_amount|intcomma }}원</summary>
@@ -318,8 +320,8 @@
                         {% endfor %}
                     </details>
 
-                    <details>
-                        <summary class="sum-cash">💵 현금/이체 · {{ stats.cash_transfer|intcomma }}원</summary>
+                    <details class="sum-cash">
+                        <summary>💵 현금/이체 · {{ stats.cash_transfer|intcomma }}원</summary>
                         {% for cat, items in cash_transfer_grouped.items %}
                             <details>
                                 <summary>{{ cat }} · {{ items|length }}건 · {{ items|sum_amount|intcomma }}원</summary>
@@ -349,7 +351,7 @@
                         <div class="history-left">
                             <span class="tag">{{ item.icon }} {{ item.name }}</span>
                         </div>
-                        <div>
+                        <div class="history-right">
                             <strong class="expense">{{ item.total|intcomma }}원</strong>
                         </div>
                     </div>
@@ -417,33 +419,39 @@
                     <h3>✅ 체크리스트</h3>
 
                     <div class="check-summary-box">
+                        <!-- ✅ 개수 -->
                         <div class="check-summary-title">
                             완료 {{ completed_check }}/{{ total_check }}
                         </div>
 
-                        <div class="check-summary-amount">
+                        <!-- ✅ 금액 (여기만 data-total!) -->
+                        <div class="check-summary-amount"
+                            id="checkSummary"
+                            data-total="{{ check_total_amount }}"
+                            data-done="{{ check_done_amount }}">
                             {{ check_done_amount|intcomma }}원 / {{ check_total_amount|intcomma }}원
                         </div>
+
                         <div class="check-summary-sub">
                             완료금액 / 전체금액
                         </div>
                     </div>
 
+                    <!-- ✅ 상세 -->
                     <details class="check-details" open>
                         <summary>상세보기</summary>
 
                         <div class="check-detail-list">
                             {% for item in check_items %}
-                            <form method="post" action="{% url 'toggle_checklist' item.pk %}" class="check-form">
+                            <form method="post"
+                                action="{% url 'toggle_checklist' item.pk %}"
+                                class="check-form">
                                 {% csrf_token %}
-                                <label class="checklist-line">
-                                    <input type="checkbox"
-                                        {% if item.is_completed %}checked{% endif %}
-                                        onchange="this.form.submit()">
 
-                                    <span>
-                                        {{ item.content }} : {{ item.amount|intcomma }}원
-                                    </span>
+                                <!-- ✅ 각 항목 (금액 data-amount만 있음) -->
+                                <label class="checklist-line" data-amount="{{ item.amount }}">
+                                    <input type="checkbox" {% if item.is_completed %}checked{% endif %}>
+                                    <span>{{ item.content }} : {{ item.amount|intcomma }}원</span>
                                 </label>
                             </form>
                             {% empty %}

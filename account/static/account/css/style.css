@@ -403,6 +403,12 @@ button:hover {
     border-top: 1px dashed var(--line-pink);
 }
 
+.history-row.hidden {
+    display: none !important;
+}
+
+.history-row:first-child{border-top: 0;}
+
 .history-row:first-of-type{border-top: 0;}
 
 .history-item {
@@ -459,6 +465,11 @@ button:hover {
     gap: 8px;
     flex: 1;
     min-width: 0;
+}
+
+.history-right {
+    display: flex;
+    align-items: center; /* ← 쇼핑 텍스트랑 높이 맞춤 */
 }
 
 .history-meta {
@@ -550,6 +561,7 @@ button:hover {
     color: #b28b90;
     font-size: 0.9rem;
     margin: 8px 0 0;
+    padding: 0 22px;
 }
 
 /* =========================
@@ -628,7 +640,7 @@ details summary {
 }
 
 details summary:hover {
-    background: #faf7f7;
+    background-color: rgba(0, 0, 0, 0.03);
 }
 
 details summary::before {
@@ -668,10 +680,10 @@ details details summary {
    합계 뱃지 (카드사별)
 ========================= */
 
-.sum-hyundai,
-.sum-shinhan,
-.sum-incident,
-.sum-cash {
+.sum-hyundai > summary,
+.sum-shinhan > summary,
+.sum-incident > summary,
+.sum-cash > summary {
     border-radius: 10px;
     padding: 8px 12px;
 }
@@ -1058,6 +1070,9 @@ details details summary {
     border-radius: 10px;
     padding-left: 4px;
     padding-right: 4px;
+    display: flex;
+    align-items: center; /* ← 세로 정렬 핵심 */
+    justify-content: space-between;
 }
 
 .category-summary-row:hover {
@@ -1462,6 +1477,15 @@ label.fuel-check-wrap:hover .checkmark {
     border-color: #ff6f7a;
 }
 
+.load-more-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    background: #f5f5f5;
+    cursor: pointer;
+}
+
 /* =========================
    반응형 (900px 이하)
 ========================= */
@@ -1544,6 +1568,14 @@ label.fuel-check-wrap:hover .checkmark {
 
     .fixed-modal-actions {
         flex-direction: column;
+    }
+
+    .summary-card {
+        max-height: 500px; /* 대략 5개 높이에 맞춰 조정 */
+        overflow-y: auto;
+    }
+    .history-row.hidden {
+        display: none;
     }
 }
 
@@ -2526,10 +2558,6 @@ body:not(.living-page) .living-nav-card .mini-btn {
    메인 페이지 거래내역
    금액 위 / 수정삭제 아래 배치
 ===================================== */
-
-body:not(.living-page) .history-row {
-    align-items: flex-start;
-}
 
 /* 우측 영역 전체 - 금액/수정/삭제 그리드 배치 */
 body:not(.living-page) .history-actions {
