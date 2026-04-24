@@ -13,6 +13,7 @@ class Transaction(models.Model):
     is_fuel = models.BooleanField(default=False)
     price_per_liter = models.FloatField(null=True, blank=True)
     liters = models.FloatField(null=True, blank=True)
+    odometer = models.PositiveIntegerField(null=True, blank=True)  # 누적 주행거리(km)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

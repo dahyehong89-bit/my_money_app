@@ -500,7 +500,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 this.dataset.description,
                 this.dataset.amount,
                 this.dataset.isFuel === "true",
-                this.dataset.price
+                this.dataset.price,
+                this.dataset.odometer
             );
         });
     });
@@ -519,7 +520,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // 메인 가계부 수정 모달 열기
-function openMainEditModal(pk, date, account, category, detail, description, amount, isFuel, price) {
+function openMainEditModal(pk, date, account, category, detail, description, amount, isFuel, price, odometer) {
     const modal = document.getElementById("mainEditModal");
     if (!modal) return;
 
@@ -536,10 +537,18 @@ function openMainEditModal(pk, date, account, category, detail, description, amo
     const fuelCheck = document.getElementById("main_edit_is_fuel");
     const fuelWrap = document.getElementById("main_edit_fuel_wrap");
     const priceInput = document.getElementById("main_edit_price");
+    const odometerInput = document.getElementById("main_edit_odometer");
 
     if (fuelCheck) fuelCheck.checked = isFuel;
     if (fuelWrap) fuelWrap.style.display = isFuel ? "block" : "none";
-    if (priceInput) priceInput.value = price || "";
+    if (priceInput) {
+        // 1975.0 → 1975 처럼 소수점 제거
+        priceInput.value = price ? Math.round(Number(price)) : "";
+    }
+    if (odometerInput) {
+        // 139055 → 139,055 콤마 포맷
+        odometerInput.value = odometer ? Number(odometer).toLocaleString("en-US") : "";
+    }
 
     if (fuelCheck) {
         fuelCheck.addEventListener("change", function () {
@@ -1004,4 +1013,40 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => {
         updateSummary();
     }, 0);
+});
+
+// =========================
+// 누적 주행거리 - 실시간 콤마 포맷 & 제출 시 콤마 제거
+// =========================
+document.addEventListener("DOMContentLoaded", function () {
+    const odometerIds = ["ui_odometer", "modal_odometer", "main_edit_odometer"];
+
+    odometerIds.forEach((id) => {
+        const input = document.getElementById(id);
+        if (!input) return;
+
+        // 타이핑할 때마다 콤마 포맷
+        input.addEventListener("input", function () {
+            // 숫자만 남기기
+            const raw = this.value.replace(/[^\d]/g, "");
+            if (raw === "") {
+                this.value = "";
+                return;
+            }
+            // 콤마 포맷
+            this.value = Number(raw).toLocaleString("en-US");
+        });
+    });
+
+    // 폼 submit 직전에 콤마 제거해서 숫자만 서버로 전송
+    document.querySelectorAll("form").forEach((form) => {
+        form.addEventListener("submit", function () {
+            odometerIds.forEach((id) => {
+                const input = form.querySelector("#" + id);
+                if (input && input.value) {
+                    input.value = input.value.replace(/,/g, "");
+                }
+            });
+        });
+    });
 });

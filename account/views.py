@@ -42,6 +42,12 @@ def index(request):
         except (TypeError, ValueError):
             price_per_liter = None
 
+        try:
+            odometer_raw = request.POST.get('odometer')
+            odometer = int(odometer_raw) if odometer_raw else None
+        except (TypeError, ValueError):
+            odometer = None
+
         if edit_pk:
             # 수정
             item = get_object_or_404(Transaction, pk=edit_pk)
@@ -53,6 +59,7 @@ def index(request):
             item.amount = amount
             item.is_fuel = is_fuel
             item.price_per_liter = price_per_liter
+            item.odometer = odometer
             item.save()
         else:
             # 신규 생성
@@ -65,6 +72,7 @@ def index(request):
                 amount=amount,
                 is_fuel=is_fuel,
                 price_per_liter=price_per_liter,
+                odometer=odometer,
             )
 
         saved_month = str(date_value)[:7]
@@ -146,12 +154,61 @@ def index(request):
         detail_category='주유'
     ).exclude(category='income').order_by('-date', '-created_at')
 
+    # 구간거리/연비 계산을 위해 오름차순(오래된 것부터)으로도 정렬
+    fuel_items_asc = list(fuel_items.order_by('date', 'created_at'))
+
     fuel_detail_list = []
     fuel_total_amount = 0
     fuel_total_liters = 0
     fuel_price_sum = 0
     fuel_price_count = 0
 
+    # 주행거리 / 연비 관련 누적 변수
+    fuel_total_distance = 0
+    fuel_distance_liters = 0  # 구간거리가 계산된 주유량만 합산 (평균 연비 분모)
+
+    # 이번달 첫 기록의 구간거리 계산을 위해 이전 달 마지막 odometer 조회
+    prev_odometer = None
+    if fuel_items_asc:
+        first_item = fuel_items_asc[0]
+        previous_fuel = Transaction.objects.filter(
+            is_fuel=True,
+            detail_category='주유',
+            odometer__isnull=False,
+            date__lt=first_item.date,
+        ).exclude(category='income').order_by('-date', '-created_at').first()
+        if previous_fuel:
+            prev_odometer = previous_fuel.odometer
+
+    # 각 기록별 구간거리/연비를 pk로 매핑
+    calc_map = {}
+
+    for item in fuel_items_asc:
+        liters_calc = None
+        if item.price_per_liter and item.price_per_liter > 0:
+            liters_calc = abs(item.amount) / item.price_per_liter
+
+        distance = None
+        mileage = None
+
+        if item.odometer and prev_odometer is not None:
+            diff = item.odometer - prev_odometer
+            if diff > 0:
+                distance = diff
+                fuel_total_distance += diff
+                if liters_calc and liters_calc > 0:
+                    mileage = diff / liters_calc
+                    fuel_distance_liters += liters_calc
+
+        if item.odometer:
+            prev_odometer = item.odometer
+
+        calc_map[item.pk] = {
+            'distance': distance,
+            'mileage': round(mileage, 2) if mileage is not None else None,
+        }
+
+    # 화면 표시는 최신순(fuel_items 원본 순서)으로
     for item in fuel_items:
         liters = None
 
@@ -163,6 +220,8 @@ def index(request):
 
         fuel_total_amount += abs(item.amount)
 
+        calc = calc_map.get(item.pk, {})
+
         fuel_detail_list.append({
             'date': item.date.strftime('%m/%d'),
             'account_type': item.get_account_type_display(),
@@ -171,10 +230,14 @@ def index(request):
             'amount': abs(item.amount),
             'price_per_liter': item.price_per_liter,
             'liters': round(liters, 2) if liters is not None else None,
+            'odometer': item.odometer,
+            'distance': calc.get('distance'),
+            'mileage': calc.get('mileage'),
         })
 
     fuel_avg_price = round(fuel_price_sum / fuel_price_count, 0) if fuel_price_count > 0 else 0
     fuel_total_liters = round(fuel_total_liters, 2)
+    fuel_avg_mileage = round(fuel_total_distance / fuel_distance_liters, 2) if fuel_distance_liters > 0 else 0
 
     hyundai_items = month_transactions.filter(
         account_type='hyundai',
@@ -312,6 +375,8 @@ def index(request):
         'fuel_total_amount': fuel_total_amount,
         'fuel_avg_price': fuel_avg_price,
         'fuel_total_liters': fuel_total_liters,
+        'fuel_total_distance': fuel_total_distance,
+        'fuel_avg_mileage': fuel_avg_mileage,
 
         'hyundai_percent': hyundai_percent,
         'hyundai_items': hyundai_items,

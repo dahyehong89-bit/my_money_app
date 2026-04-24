@@ -511,6 +511,12 @@ button:hover {
     color: #7f6f71;
 }
 
+.history-sub {
+    font-size: 0.9em;
+    color: #888;
+    margin-top: 2px;
+}
+
 /* =========================
    금액 색상
 ========================= */

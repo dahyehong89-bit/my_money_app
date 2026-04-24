@@ -71,6 +71,7 @@
 
                         <div id="ui_fuel_section" style="display:none;">
                             <input type="number" name="price_per_liter" id="ui_fuel_price" placeholder="리터당 단가">
+                            <input type="text" name="odometer" id="ui_odometer" placeholder="누적 주행거리(km)" inputmode="numeric">
                         </div>
 
                         <button type="submit" class="submit-btn">✅ 저장</button>
@@ -207,7 +208,8 @@
                                     data-description="{{ item.description|default_if_none:''|escape }}"
                                     data-amount="{{ item.amount }}"
                                     data-is-fuel="{{ item.is_fuel|yesno:'true,false' }}"
-                                    data-price="{{ item.price_per_liter|default_if_none:'' }}">
+                                    data-price="{{ item.price_per_liter|default_if_none:'' }}"
+                                    data-odometer="{{ item.odometer|default_if_none:'' }}">
                                 수정
                             </button>
                             <a href="{% url 'delete_transaction' item.pk %}" class="mini-btn danger" onclick="return confirm('삭제할까요?');">삭제</a>
@@ -392,6 +394,20 @@
                                         · 약 {{ item.liters|floatformat:2 }}L
                                     {% endif %}
                                 </div>
+
+                                {% if item.odometer or item.distance or item.mileage %}
+                                <div class="history-desc history-sub">
+                                    {% if item.odometer %}
+                                        🚗 {{ item.odometer|intcomma }}km
+                                    {% endif %}
+                                    {% if item.distance %}
+                                        · 구간 {{ item.distance|intcomma }}km
+                                    {% endif %}
+                                    {% if item.mileage %}
+                                        · 연비 {{ item.mileage|floatformat:2 }}km/L
+                                    {% endif %}
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}
@@ -409,6 +425,18 @@
                                 <span>총 주유량</span>
                                 <strong>{{ fuel_total_liters|floatformat:2 }}L</strong>
                             </div>
+                            {% if fuel_avg_mileage %}
+                            <div class="fuel-summary-line">
+                                <span>평균 연비</span>
+                                <strong>{{ fuel_avg_mileage|floatformat:2 }}km/L</strong>
+                            </div>
+                            {% endif %}
+                            {% if fuel_total_distance %}
+                            <div class="fuel-summary-line">
+                                <span>총 주행거리</span>
+                                <strong>{{ fuel_total_distance|intcomma }}km</strong>
+                            </div>
+                            {% endif %}
                         </div>
                     {% else %}
                         <p class="empty-text">주유 내역이 없습니다.</p>
@@ -522,6 +550,7 @@
                         <label>⛽ 주유 정보</label>
                         <input type="hidden" name="is_fuel" id="modal_is_fuel">
                         <input type="number" name="price_per_liter" id="modal_fuel_price" placeholder="리터당 단가" class="modal-input" oninput="calcLiterInModal()">
+                        <input type="text" name="odometer" id="modal_odometer" placeholder="누적 주행거리(km)" class="modal-input" inputmode="numeric">
                         <p id="modal_calc_result"></p>
                     </div>
                 </div>
@@ -609,7 +638,7 @@
 
                     <div>
                         <label class="fuel-check-wrap">
-                            <input type="checkbox" id="main_edit_is_fuel">
+                            <input type="checkbox" name="is_fuel" id="main_edit_is_fuel">
                             <span class="checkmark"></span>
                             <span class="label-text">주유 항목</span>
                         </label>
@@ -618,6 +647,8 @@
                     <div id="main_edit_fuel_wrap" style="display:none;">
                         <label for="main_edit_price">리터당 단가</label>
                         <input type="number" name="price_per_liter" id="main_edit_price" class="modal-input">
+                        <label for="main_edit_odometer" style="margin-top: 15px;">누적 주행거리(km)</label>
+                        <input type="text" name="odometer" id="main_edit_odometer" class="modal-input" inputmode="numeric">
                     </div>
                 </div>
 
