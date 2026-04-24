@@ -900,7 +900,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-    const rows = document.querySelectorAll(".history-row");
+    const rows = document.querySelectorAll(".main-history-row");
     const btn = document.getElementById("loadMoreBtn");
 
     const SHOW_COUNT = 8;

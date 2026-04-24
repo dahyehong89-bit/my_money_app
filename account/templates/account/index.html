@@ -159,7 +159,7 @@
                     <p class="history-filter-empty" id="main_history_empty" style="display:none;">조건에 맞는 내역이 없어요.</p>
 
                     {% for item in history %}
-                    <div class="history-row" data-filter-account="{{ item.account_type }}">
+                    <div class="history-row main-history-row" data-filter-account="{{ item.account_type }}">
                         <div class="history-left history-left-vertical">
                             <div class="history-meta">
                                 <span class="history-date">{{ item.date|date:"m/d" }}</span>

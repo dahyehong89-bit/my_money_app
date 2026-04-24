@@ -420,7 +420,7 @@ button:hover {
 .detail-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: end;
     gap: 12px;
     padding: 10px 0;
     border-bottom: 1px dashed #f1d6d6;
