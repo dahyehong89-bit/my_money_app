@@ -33,3 +33,10 @@ class CheckList(models.Model):
 
     def __str__(self):
         return f"{self.month.strftime('%Y-%m')} - {self.content}"
+    
+
+class Memo(models.Model):
+    text = models.CharField(max_length=255)
+    checked = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    checked_at = models.DateTimeField(null=True, blank=True)  # 체크한 시각

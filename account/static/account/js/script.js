@@ -1086,3 +1086,127 @@ document.addEventListener("DOMContentLoaded", function () {
         btn.textContent = expanded ? "접기" : "더보기";
     });
 });
+
+
+const input = document.getElementById("memoInput");
+const list = document.getElementById("memoList");
+const toggleBtn = document.getElementById("toggleBtn");
+
+let memos = [];
+let expanded = false;
+
+// 📌 서버에서 불러오기
+async function loadMemos() {
+  const res = await fetch("/api/memo/");
+  memos = await res.json();
+  render();
+}
+
+// 📌 메모 추가
+async function saveMemo(text) {
+  const res = await fetch("/api/memo/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text })
+  });
+  return await res.json();
+}
+
+// 📌 체크 업데이트
+async function updateMemo(id, checked) {
+  const res = await fetch(`/api/memo/${id}/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ checked })
+  });
+  return await res.json();  // ✅ checked_time 받아오기
+}
+
+// 📌 삭제
+async function deleteMemo(id) {
+  await fetch(`/api/memo/${id}/`, {
+    method: "DELETE"
+  });
+}
+
+// 📌 입력 이벤트
+input.addEventListener("keydown", async (e) => {
+  if (e.key === "Enter" && input.value.trim()) {
+    const newMemo = await saveMemo(input.value);
+
+    memos.unshift(newMemo);
+    input.value = "";
+    input.focus();
+    render();
+  }
+});
+
+function render() {
+
+  // ✅ 3일 지난 체크된 메모 삭제 (checked_time 기준, ms 단위)
+  const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+  memos = memos.filter(m => {
+    if (m.checked && m.checked_time && Date.now() - m.checked_time > THREE_DAYS) {
+      deleteMemo(m.id);
+      return false;  // ✅ 화면 목록에서도 즉시 제거
+    }
+    return true;
+  });
+
+  list.innerHTML = "";
+
+  let displayList = expanded ? memos : memos.slice(0, 5);
+
+  displayList.forEach((m) => {
+    const li = document.createElement("li");
+
+    li.innerHTML = `
+        <label class="memo-item">
+            <input type="checkbox" ${m.checked ? "checked" : ""}>
+            <span class="memo-date">[${m.date}]</span>
+            <span class="memo-text">${m.text}</span>
+        </label>
+    `;
+
+    const checkbox = li.querySelector("input");
+
+    // 수정
+    checkbox.addEventListener("change", async () => {
+        m.checked = checkbox.checked;
+
+        const result = await updateMemo(m.id, m.checked);
+        m.checked_time = result.checked_time;  // ✅ 체크한 시각 저장
+
+        if (m.checked) {
+            memos = memos.filter(x => x !== m);
+            memos.push(m);
+        }
+
+        render();
+    });
+
+    if (m.checked) li.classList.add("memo-checked");
+
+    list.appendChild(li);
+  });
+
+  // ✅ 버튼 표시 조건 + 상태 초기화
+  if (memos.length <= 5) {
+    expanded = false;
+    toggleBtn.style.display = "none";
+  } else {
+    toggleBtn.style.display = "block";
+    toggleBtn.textContent = expanded
+      ? "접기 ▲"
+      : `더보기 (${memos.length - 5}) ▼`;
+  }
+}
+
+// 📌 더보기 토글
+toggleBtn.addEventListener("click", () => {
+  expanded = !expanded;
+  render();
+});
+
+// 📌 초기 실행
+loadMemos();

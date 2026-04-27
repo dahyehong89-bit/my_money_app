@@ -17,7 +17,10 @@ from .category_config import (
 from datetime import date
 from calendar import monthrange
 import json
+from django.http import JsonResponse
+from .models import Memo
 from .decorators import simple_login_required
+from django.views.decorators.csrf import csrf_exempt
 
 @simple_login_required
 def index(request):
@@ -767,3 +770,52 @@ def simple_login(request):
 def simple_logout(request):
     request.session.flush()
     return redirect("simple_login")
+
+@csrf_exempt
+def memo_list(request):
+    if request.method == "GET":
+        # 3일 지난 체크된 메모는 서버에서도 자동 정리
+        cutoff = timezone.now() - timezone.timedelta(days=3)
+        Memo.objects.filter(checked=True, checked_at__lt=cutoff).delete()
+
+        memos = Memo.objects.all().order_by("-created_at")
+        data = [{
+            "id": m.id,
+            "text": m.text,
+            "checked": m.checked,
+            "date": f"{m.created_at.month}/{m.created_at.day}",
+            # ✅ 밀리초로 통일 + 체크된 메모는 checked_at 기준
+            "checked_time": m.checked_at.timestamp() * 1000 if m.checked_at else None,
+        } for m in memos]
+        return JsonResponse(data, safe=False)
+
+    if request.method == "POST":
+        body = json.loads(request.body)
+        memo = Memo.objects.create(text=body["text"])
+        return JsonResponse({
+            "id": memo.id,
+            "text": memo.text,
+            "checked": memo.checked,
+            "date": f"{memo.created_at.month}/{memo.created_at.day}",
+            "checked_time": None,
+        })
+
+
+@csrf_exempt
+def memo_detail(request, id):
+    memo = Memo.objects.get(id=id)
+
+    if request.method == "POST":
+        body = json.loads(request.body)
+        memo.checked = body["checked"]
+        # ✅ 체크 상태에 따라 checked_at 갱신
+        memo.checked_at = timezone.now() if memo.checked else None
+        memo.save()
+        return JsonResponse({
+            "ok": True,
+            "checked_time": memo.checked_at.timestamp() * 1000 if memo.checked_at else None,
+        })
+
+    if request.method == "DELETE":
+        memo.delete()
+        return JsonResponse({"ok": True})
