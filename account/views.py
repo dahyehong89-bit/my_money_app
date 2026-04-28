@@ -21,6 +21,7 @@ from django.http import JsonResponse
 from .models import Memo
 from .decorators import simple_login_required
 from django.views.decorators.csrf import csrf_exempt
+from datetime import timedelta
 
 @simple_login_required
 def index(request):
@@ -242,6 +243,60 @@ def index(request):
     fuel_total_liters = round(fuel_total_liters, 2)
     fuel_avg_mileage = round(fuel_total_distance / fuel_distance_liters, 2) if fuel_distance_liters > 0 else 0
 
+    # ─────────────────────────────────────────
+    # ✅ 누적 주유 통계 (전체 기간)
+    # ─────────────────────────────────────────
+    all_fuel_items = Transaction.objects.filter(
+        is_fuel=True,
+        detail_category='주유'
+    ).exclude(category='income').order_by('date', 'created_at')
+
+    cumulative_count = all_fuel_items.count()
+    cumulative_total_amount = sum(abs(f.amount) for f in all_fuel_items)
+    cumulative_total_liters = 0
+    cumulative_total_distance = 0
+    cumulative_distance_liters = 0
+
+    prev_odo = None
+    for f in all_fuel_items:
+        # 누적 주유량
+        if f.price_per_liter and f.price_per_liter > 0:
+            liters_calc = abs(f.amount) / f.price_per_liter
+            cumulative_total_liters += liters_calc
+
+            # 누적 주행거리/연비
+            if f.odometer and prev_odo is not None:
+                diff = f.odometer - prev_odo
+                if diff > 0:
+                    cumulative_total_distance += diff
+                    cumulative_distance_liters += liters_calc
+
+        if f.odometer:
+            prev_odo = f.odometer
+
+    cumulative_total_liters = round(cumulative_total_liters, 2)
+    cumulative_avg_mileage = (
+        round(cumulative_total_distance / cumulative_distance_liters, 2)
+        if cumulative_distance_liters > 0 else 0
+    )
+
+    # ─────────────────────────────────────────
+    # ✅ 최근 1년 주유 추이 차트 데이터
+    # ─────────────────────────────────────────
+    
+
+    one_year_ago = timezone.now().date() - timedelta(days=365)
+
+    recent_fuel = Transaction.objects.filter(
+        is_fuel=True,
+        detail_category='주유',
+        date__gte=one_year_ago,
+    ).exclude(category='income').order_by('date', 'created_at')
+
+    fuel_chart_labels = [f.date.strftime('%y/%m/%d') for f in recent_fuel]
+    fuel_chart_prices = [f.price_per_liter or 0 for f in recent_fuel]
+    fuel_chart_amounts = [abs(f.amount) for f in recent_fuel]
+
     hyundai_items = month_transactions.filter(
         account_type='hyundai',
         category='expense'
@@ -380,6 +435,13 @@ def index(request):
         'fuel_total_liters': fuel_total_liters,
         'fuel_total_distance': fuel_total_distance,
         'fuel_avg_mileage': fuel_avg_mileage,
+        'cumulative_count': cumulative_count,
+        'cumulative_total_amount': cumulative_total_amount,
+        'cumulative_total_liters': cumulative_total_liters,
+        'cumulative_avg_mileage': cumulative_avg_mileage,
+        'fuel_chart_labels': fuel_chart_labels,
+        'fuel_chart_prices': fuel_chart_prices,
+        'fuel_chart_amounts': fuel_chart_amounts,
 
         'hyundai_percent': hyundai_percent,
         'hyundai_items': hyundai_items,

@@ -1088,125 +1088,240 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+// 수정 — 메모 박스가 있는 페이지에서만 실행
 const input = document.getElementById("memoInput");
 const list = document.getElementById("memoList");
 const toggleBtn = document.getElementById("toggleBtn");
 
-let memos = [];
-let expanded = false;
+if (input && list && toggleBtn) {   // ✅ 메모 박스가 있을 때만 실행
 
-// 📌 서버에서 불러오기
-async function loadMemos() {
-  const res = await fetch("/api/memo/");
-  memos = await res.json();
-  render();
-}
+  let memos = [];
+  let expanded = false;
 
-// 📌 메모 추가
-async function saveMemo(text) {
-  const res = await fetch("/api/memo/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text })
-  });
-  return await res.json();
-}
-
-// 📌 체크 업데이트
-async function updateMemo(id, checked) {
-  const res = await fetch(`/api/memo/${id}/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ checked })
-  });
-  return await res.json();  // ✅ checked_time 받아오기
-}
-
-// 📌 삭제
-async function deleteMemo(id) {
-  await fetch(`/api/memo/${id}/`, {
-    method: "DELETE"
-  });
-}
-
-// 📌 입력 이벤트
-input.addEventListener("keydown", async (e) => {
-  if (e.key === "Enter" && input.value.trim()) {
-    const newMemo = await saveMemo(input.value);
-
-    memos.unshift(newMemo);
-    input.value = "";
-    input.focus();
+  // 📌 서버에서 불러오기
+  async function loadMemos() {
+    const res = await fetch("/api/memo/");
+    memos = await res.json();
     render();
   }
-});
 
-function render() {
+  // 📌 메모 추가
+  async function saveMemo(text) {
+    const res = await fetch("/api/memo/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+    return await res.json();
+  }
 
-  // ✅ 3일 지난 체크된 메모 삭제 (checked_time 기준, ms 단위)
-  const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
-  memos = memos.filter(m => {
-    if (m.checked && m.checked_time && Date.now() - m.checked_time > THREE_DAYS) {
-      deleteMemo(m.id);
-      return false;  // ✅ 화면 목록에서도 즉시 제거
+  // 📌 체크 업데이트
+  async function updateMemo(id, checked) {
+    const res = await fetch(`/api/memo/${id}/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ checked })
+    });
+    return await res.json();
+  }
+
+  // 📌 삭제
+  async function deleteMemo(id) {
+    await fetch(`/api/memo/${id}/`, {
+      method: "DELETE"
+    });
+  }
+
+  // 📌 입력 이벤트
+  input.addEventListener("keydown", async (e) => {
+    if (e.key === "Enter" && input.value.trim()) {
+      const newMemo = await saveMemo(input.value);
+      memos.unshift(newMemo);
+      input.value = "";
+      input.focus();
+      render();
     }
-    return true;
   });
 
-  list.innerHTML = "";
+  function render() {
+    // ✅ 3일 지난 체크된 메모 삭제 (checked_time 기준, ms 단위)
+    const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+    memos = memos.filter(m => {
+      if (m.checked && m.checked_time && Date.now() - m.checked_time > THREE_DAYS) {
+        deleteMemo(m.id);
+        return false;
+      }
+      return true;
+    });
 
-  let displayList = expanded ? memos : memos.slice(0, 5);
+    list.innerHTML = "";
 
-  displayList.forEach((m) => {
-    const li = document.createElement("li");
+    let displayList = expanded ? memos : memos.slice(0, 5);
 
-    li.innerHTML = `
+    displayList.forEach((m) => {
+      const li = document.createElement("li");
+
+      li.innerHTML = `
         <label class="memo-item">
-            <input type="checkbox" ${m.checked ? "checked" : ""}>
-            <span class="memo-date">[${m.date}]</span>
-            <span class="memo-text">${m.text}</span>
+          <input type="checkbox" ${m.checked ? "checked" : ""}>
+          <span class="memo-date">[${m.date}]</span>
+          <span class="memo-text">${m.text}</span>
         </label>
-    `;
+      `;
 
-    const checkbox = li.querySelector("input");
+      const checkbox = li.querySelector("input");
 
-    // 수정
-    checkbox.addEventListener("change", async () => {
+      checkbox.addEventListener("change", async () => {
         m.checked = checkbox.checked;
 
         const result = await updateMemo(m.id, m.checked);
-        m.checked_time = result.checked_time;  // ✅ 체크한 시각 저장
+        m.checked_time = result.checked_time;
 
         if (m.checked) {
-            memos = memos.filter(x => x !== m);
-            memos.push(m);
+          memos = memos.filter(x => x !== m);
+          memos.push(m);
         }
 
         render();
+      });
+
+      if (m.checked) li.classList.add("memo-checked");
+
+      list.appendChild(li);
     });
 
-    if (m.checked) li.classList.add("memo-checked");
+    // ✅ 버튼 표시 조건 + 상태 초기화
+    if (memos.length <= 5) {
+      expanded = false;
+      toggleBtn.style.display = "none";
+    } else {
+      toggleBtn.style.display = "block";
+      toggleBtn.textContent = expanded
+        ? "접기 ▲"
+        : `더보기 (${memos.length - 5}) ▼`;
+    }
+  }
 
-    list.appendChild(li);
+  // 📌 더보기 토글
+  toggleBtn.addEventListener("click", () => {
+    expanded = !expanded;
+    render();
   });
 
-  // ✅ 버튼 표시 조건 + 상태 초기화
-  if (memos.length <= 5) {
-    expanded = false;
-    toggleBtn.style.display = "none";
-  } else {
-    toggleBtn.style.display = "block";
-    toggleBtn.textContent = expanded
-      ? "접기 ▲"
-      : `더보기 (${memos.length - 5}) ▼`;
-  }
+  // 📌 초기 실행
+  loadMemos();
+
+}  // ✅ if 닫기
+
+
+// ─────────────────────────────────────────
+// ⛽ 주유 관리 - 탭 전환
+// ─────────────────────────────────────────
+const fuelTabBtns = document.querySelectorAll(".fuel-tab-btn");
+const fuelTabContents = document.querySelectorAll(".fuel-tab-content");
+let fuelChartsRendered = false;
+
+if (fuelTabBtns.length > 0) {   // ✅ 주유 탭이 있는 페이지에서만 실행
+    fuelTabBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const target = btn.dataset.tab;
+
+            fuelTabBtns.forEach(b => b.classList.toggle("active", b === btn));
+            fuelTabContents.forEach(c => {
+                c.style.display = c.dataset.tabContent === target ? "" : "none";
+            });
+
+            // 차트 탭 처음 열 때만 렌더링 (성능 + 사이즈 이슈 방지)
+            if (target === "chart" && !fuelChartsRendered) {
+                renderFuelCharts();
+                fuelChartsRendered = true;
+            }
+        });
+    });
 }
 
-// 📌 더보기 토글
-toggleBtn.addEventListener("click", () => {
-  expanded = !expanded;
-  render();
-});
+// ─────────────────────────────────────────
+// ⛽ 주유 추이 차트
+// ─────────────────────────────────────────
+function renderFuelCharts() {
+    const labelsEl = document.getElementById("fuel-chart-labels");
+    const pricesEl = document.getElementById("fuel-chart-prices");
+    const amountsEl = document.getElementById("fuel-chart-amounts");
 
-// 📌 초기 실행
-loadMemos();
+    if (!labelsEl || !pricesEl || !amountsEl) return;
+
+    const labels = JSON.parse(labelsEl.textContent);
+    const prices = JSON.parse(pricesEl.textContent);
+    const amounts = JSON.parse(amountsEl.textContent);
+
+    if (labels.length === 0) return;
+
+    // L당 단가 추이
+    const priceCanvas = document.getElementById("fuelPriceChart");
+    if (priceCanvas) {
+        new Chart(priceCanvas, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "L당 단가 (원)",
+                    data: prices,
+                    borderColor: "#6ccf9c",
+                    backgroundColor: "rgba(108, 207, 156, 0.15)",
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true, text: "L당 단가 추이", font: { size: 14 } },
+                    legend: { display: false },
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: v => v.toLocaleString() + "원"
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 1회 주유 금액 추이
+    const amountCanvas = document.getElementById("fuelAmountChart");
+    if (amountCanvas) {
+        new Chart(amountCanvas, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "주유 금액 (원)",
+                    data: amounts,
+                    backgroundColor: "rgba(255, 159, 159, 0.6)",
+                    borderColor: "#ff7f7f",
+                    borderWidth: 1,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true, text: "주유 1회 금액 추이", font: { size: 14 } },
+                    legend: { display: false },
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: v => v.toLocaleString() + "원"
+                        }
+                    }
+                }
+            }
+        });
+    }
+}

@@ -368,84 +368,125 @@
                 </div>
 
                 <div class="summary-card">
-                    <h3>⛽ 주유 관리 (전체 기록)</h3>
+                    <div class="fuel-header-row">
+                        <h3>⛽ 주유 관리</h3>
+                        <div class="fuel-tab-row">
+                            <button type="button" class="fuel-tab-btn active" data-tab="list">📋 목록</button>
+                            <button type="button" class="fuel-tab-btn" data-tab="chart">📈 추이</button>
+                        </div>
+                    </div>
 
-                    {% if fuel_detail_list %}
-                        {% for item in fuel_detail_list %}
-                        <div class="history-row">
-                            <div class="history-left history-left-vertical">
-                                <div class="history-meta">
-                                    <span class="history-date">{{ item.date }}</span>
-
-                                    <span class="tag {% if item.category == 'non_expense' %}tag-non-expense{% endif %}">
-                                        {% if item.category == 'non_expense' %}
-                                            비지출
-                                        {% else %}
-                                            {{ item.account_type }}
+                    {# ─── 탭 1: 목록 ─── #}
+                    <div class="fuel-tab-content" data-tab-content="list">
+                        {% if fuel_detail_list %}
+                            {% for item in fuel_detail_list %}
+                            <div class="history-row">
+                                <div class="history-left history-left-vertical">
+                                    <div class="history-meta">
+                                        <span class="history-date">{{ item.date }}</span>
+                                        <span class="tag {% if item.category == 'non_expense' %}tag-non-expense{% endif %}">
+                                            {% if item.category == 'non_expense' %}
+                                                비지출
+                                            {% else %}
+                                                {{ item.account_type }}
+                                            {% endif %}
+                                        </span>
+                                        {% if item.category == 'non_expense' and item.description %}
+                                            <span class="fuel-memo">{{ item.description }}</span>
                                         {% endif %}
-                                    </span>
-
-                                    {% if item.category == 'non_expense' and item.description %}
-                                        <span class="fuel-memo">{{ item.description }}</span>
+                                    </div>
+                                    <div class="history-desc">
+                                        {{ item.amount|intcomma }}원
+                                        {% if item.price_per_liter %}
+                                            · {{ item.price_per_liter|floatformat:0|intcomma }}원/L
+                                        {% endif %}
+                                        {% if item.liters %}
+                                            · 약 {{ item.liters|floatformat:2 }}L
+                                        {% endif %}
+                                    </div>
+                                    {% if item.odometer or item.distance or item.mileage %}
+                                    <div class="history-desc history-sub">
+                                        {% if item.odometer %}🚗 {{ item.odometer|intcomma }}km{% endif %}
+                                        {% if item.distance %} · 구간 {{ item.distance|intcomma }}km{% endif %}
+                                        {% if item.mileage %} · 연비 {{ item.mileage|floatformat:2 }}km/L{% endif %}
+                                    </div>
                                     {% endif %}
                                 </div>
+                            </div>
+                            {% endfor %}
 
-                                <div class="history-desc">
-                                    {{ item.amount|intcomma }}원
-                                    {% if item.price_per_liter %}
-                                        · {{ item.price_per_liter|floatformat:0|intcomma }}원/L
-                                    {% endif %}
-                                    {% if item.liters %}
-                                        · 약 {{ item.liters|floatformat:2 }}L
-                                    {% endif %}
+                            <div class="fuel-summary-box">
+                                <div class="fuel-summary-title">📅 이번달</div>
+                                <div class="fuel-summary-line">
+                                    <span>주유 합계</span>
+                                    <strong class="expense">{{ fuel_total_amount|intcomma }}원</strong>
                                 </div>
-
-                                {% if item.odometer or item.distance or item.mileage %}
-                                <div class="history-desc history-sub">
-                                    {% if item.odometer %}
-                                        🚗 {{ item.odometer|intcomma }}km
-                                    {% endif %}
-                                    {% if item.distance %}
-                                        · 구간 {{ item.distance|intcomma }}km
-                                    {% endif %}
-                                    {% if item.mileage %}
-                                        · 연비 {{ item.mileage|floatformat:2 }}km/L
-                                    {% endif %}
+                                <div class="fuel-summary-line">
+                                    <span>평균 단가</span>
+                                    <strong>{{ fuel_avg_price|floatformat:0|intcomma }}원/L</strong>
+                                </div>
+                                <div class="fuel-summary-line">
+                                    <span>총 주유량</span>
+                                    <strong>{{ fuel_total_liters|floatformat:2 }}L</strong>
+                                </div>
+                                {% if fuel_avg_mileage %}
+                                <div class="fuel-summary-line">
+                                    <span>평균 연비</span>
+                                    <strong>{{ fuel_avg_mileage|floatformat:2 }}km/L</strong>
+                                </div>
+                                {% endif %}
+                                {% if fuel_total_distance %}
+                                <div class="fuel-summary-line">
+                                    <span>총 주행거리</span>
+                                    <strong>{{ fuel_total_distance|intcomma }}km</strong>
                                 </div>
                                 {% endif %}
                             </div>
-                        </div>
-                        {% endfor %}
+                        {% else %}
+                            <p class="empty-text">이번달 주유 내역이 없습니다.</p>
+                        {% endif %}
 
-                        <div class="fuel-summary-box">
+                        {% if cumulative_count %}
+                        <div class="fuel-summary-box fuel-cumulative-box">
+                            <div class="fuel-summary-title">🚛 누적 (전체 기간)</div>
                             <div class="fuel-summary-line">
-                                <span>이번달 주유 합계</span>
-                                <strong class="expense">{{ fuel_total_amount|intcomma }}원</strong>
+                                <span>주유 횟수</span>
+                                <strong>{{ cumulative_count }}회</strong>
                             </div>
                             <div class="fuel-summary-line">
-                                <span>평균 단가</span>
-                                <strong>{{ fuel_avg_price|floatformat:0|intcomma }}원/L</strong>
+                                <span>총 주유비</span>
+                                <strong>{{ cumulative_total_amount|intcomma }}원</strong>
                             </div>
                             <div class="fuel-summary-line">
                                 <span>총 주유량</span>
-                                <strong>{{ fuel_total_liters|floatformat:2 }}L</strong>
+                                <strong>{{ cumulative_total_liters|floatformat:2 }}L</strong>
                             </div>
-                            {% if fuel_avg_mileage %}
-                            <div class="fuel-summary-line">
-                                <span>평균 연비</span>
-                                <strong>{{ fuel_avg_mileage|floatformat:2 }}km/L</strong>
-                            </div>
-                            {% endif %}
-                            {% if fuel_total_distance %}
+                            {% if cumulative_total_distance %}
                             <div class="fuel-summary-line">
                                 <span>총 주행거리</span>
-                                <strong>{{ fuel_total_distance|intcomma }}km</strong>
+                                <strong>{{ cumulative_total_distance|intcomma }}km</strong>
+                            </div>
+                            {% endif %}
+                            {% if cumulative_avg_mileage %}
+                            <div class="fuel-summary-line">
+                                <span>평균 연비</span>
+                                <strong>{{ cumulative_avg_mileage|floatformat:2 }}km/L</strong>
                             </div>
                             {% endif %}
                         </div>
-                    {% else %}
-                        <p class="empty-text">주유 내역이 없습니다.</p>
-                    {% endif %}
+                        {% endif %}
+                    </div>
+
+                    {# ─── 탭 2: 차트 ─── #}
+                    <div class="fuel-tab-content" data-tab-content="chart" style="display:none;">
+                        <p class="fuel-chart-period">최근 1년 추이</p>
+                        <div class="fuel-chart-wrap">
+                            <canvas id="fuelPriceChart"></canvas>
+                        </div>
+                        <div class="fuel-chart-wrap">
+                            <canvas id="fuelAmountChart"></canvas>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="summary-card">
@@ -669,6 +710,11 @@
     <script id="fuel_prices_data" type="application/json">{{ fuel_prices|safe }}</script>
     {{ category_detail_map|json_script:"category-detail-data" }}
     <script id="category-map-data" type="application/json">{{ CATEGORY_MAP_JSON|safe }}</script>
+
+    {{ fuel_chart_labels|json_script:"fuel-chart-labels" }}
+    {{ fuel_chart_prices|json_script:"fuel-chart-prices" }}
+    {{ fuel_chart_amounts|json_script:"fuel-chart-amounts" }}
+
 
     <script src="{% static 'account/js/script.js' %}?v=5"></script>
 </body>

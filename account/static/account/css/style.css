@@ -960,11 +960,13 @@ details details summary {
 }
 
 .fuel-summary-box {
-    padding-top: 14px;
-    border-top: 1px dashed #ffd6da;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    background: #fceaea;
+    padding: 12px 14px;
+    margin-top: 12px;
+    border-radius: 15px;
 }
 
 .fuel-summary-line {
@@ -996,6 +998,87 @@ details details summary {
 
 .fuel-history-line {
     margin-top: 8px;
+}
+
+/* 통계 박스 소제목 */
+.fuel-summary-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+/* 누적 박스는 이번달 박스랑 살짝 구분 */
+.fuel-cumulative-box {
+    margin-top: 14px;
+    border-radius: 0;
+    background: #eeeef0;
+    padding: 12px 14px;
+    border-radius: 15px;
+}
+
+/* 주유 카드 헤더 (제목 + 탭) */
+.fuel-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.fuel-header-row h3 {
+    margin: 0;
+}
+
+/* 탭 버튼 그룹 */
+.fuel-tab-row {
+    display: flex;
+    gap: 4px;
+    background: #f3f3f3;
+    border-radius: 8px;
+    padding: 3px;
+    flex-shrink: 0;
+}
+
+.fuel-tab-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 12px;
+    font-size: 14px;
+    color: #777;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;   /* ✅ 글자 줄바꿈 방지 */
+}
+
+.fuel-tab-btn:hover {
+    color: #333;
+}
+
+.fuel-tab-btn.active {
+    background: #fff;
+    color: #4fc08d;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* 차트 영역 */
+.fuel-chart-period {
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+    margin: 0 0 12px;
+}
+
+.fuel-chart-wrap {
+    position: relative;
+    height: 220px;
+    margin-bottom: 20px;
+}
+
+.fuel-chart-wrap:last-child {
+    margin-bottom: 0;
 }
 
 /* =========================
