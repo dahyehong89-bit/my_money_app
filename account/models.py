@@ -14,7 +14,7 @@ class Transaction(models.Model):
     price_per_liter = models.FloatField(null=True, blank=True)
     liters = models.FloatField(null=True, blank=True)
     odometer = models.PositiveIntegerField(null=True, blank=True)  # 누적 주행거리(km)
-
+    tags = models.CharField(max_length=200, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):

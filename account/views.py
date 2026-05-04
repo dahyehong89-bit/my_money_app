@@ -32,6 +32,7 @@ def index(request):
         category = request.POST.get('category')
         detail_category = request.POST.get('detail_category', '기타')
         description = request.POST.get('description')
+        tags_raw = request.POST.get('tags', '') 
 
         try:
             amount = int(request.POST.get('amount', 0))
@@ -51,6 +52,8 @@ def index(request):
             odometer = int(odometer_raw) if odometer_raw else None
         except (TypeError, ValueError):
             odometer = None
+        
+        tags_cleaned = ','.join([t.strip() for t in tags_raw.split(',') if t.strip()])
 
         if edit_pk:
             # 수정
@@ -64,6 +67,7 @@ def index(request):
             item.is_fuel = is_fuel
             item.price_per_liter = price_per_liter
             item.odometer = odometer
+            item.tags = tags_cleaned
             item.save()
         else:
             # 신규 생성
@@ -77,6 +81,7 @@ def index(request):
                 is_fuel=is_fuel,
                 price_per_liter=price_per_liter,
                 odometer=odometer,
+                tags=tags_cleaned,
             )
 
         saved_month = str(date_value)[:7]
@@ -105,7 +110,10 @@ def index(request):
                 is_completed=False,
             )
 
-    month_transactions = Transaction.objects.exclude(
+    selected_tag = request.GET.get('tag', '')  # 태그 필터
+
+    # 전체 거래 내역 (태그 필터 전)
+    month_transactions_all = Transaction.objects.exclude(
         account_type='living'
     ).filter(
         date__year=month_start.year,
@@ -119,7 +127,8 @@ def index(request):
         return dict(grouped)
 
     def get_monthly_total(acc_type):
-        return month_transactions.filter(
+        # 통계는 항상 전체 데이터 기준
+        return month_transactions_all.filter(
             account_type=acc_type,
             category='expense'
         ).aggregate(Sum('amount'))['amount__sum'] or 0
@@ -144,8 +153,55 @@ def index(request):
     check_total_amount = sum(item.amount for item in checklist_items)
     check_done_amount = sum(item.amount for item in checklist_items if item.is_completed)
 
-    history = month_transactions.order_by('-date', '-created_at')
-    fuel_list = month_transactions.filter(
+    # 태그 필터 적용 (화면 표시용)
+    month_transactions = month_transactions_all
+    if selected_tag:
+        month_transactions = month_transactions.filter(tags__icontains=selected_tag)
+
+    history_raw = month_transactions.order_by('-date', '-created_at')
+    
+    # 태그 색상 생성 함수
+    def generate_tag_color(tag_text):
+        """태그 텍스트 기반으로 파스텔 색상 생성"""
+        # 간단한 해시 함수
+        hash_val = sum(ord(c) for c in tag_text)
+        
+        # 파스텔 컬러 팔레트 (배경, 글자색)
+        colors = [
+            ('#e8f5e9', '#2e7d32'),  # 초록
+            ('#e3f2fd', '#1565c0'),  # 파랑
+            ('#fff3e0', '#e65100'),  # 주황
+            ('#f3e5f5', '#6a1b9a'),  # 보라
+            ('#fce4ec', '#c2185b'),  # 핑크
+            ('#fff9c4', '#f57f17'),  # 노랑
+            ('#ffebee', '#c62828'),  # 빨강
+            ('#e0f2f1', '#00695c'),  # 청록
+            ('#f1f8e9', '#558b2f'),  # 라임
+            ('#ede7f6', '#4527a0'),  # 인디고
+        ]
+        
+        return colors[hash_val % len(colors)]
+    
+    # 태그를 리스트로 변환 + 색상 추가
+    history = []
+    for item in history_raw:
+        if item.tags:
+            item.tags_list = []
+            for t in item.tags.split(','):
+                tag_text = t.strip()
+                if tag_text:
+                    bg_color, text_color = generate_tag_color(tag_text)
+                    item.tags_list.append({
+                        'text': tag_text,
+                        'bg_color': bg_color,
+                        'text_color': text_color,
+                    })
+        else:
+            item.tags_list = []
+        history.append(item)
+    
+    # 주유 통계는 태그 필터 무관 (전체 데이터 기준)
+    fuel_list = month_transactions_all.filter(
         is_fuel=True,
         detail_category='주유'
     ).exclude(category='income').order_by('date')
@@ -153,7 +209,7 @@ def index(request):
     fuel_labels = [f.date.strftime('%m/%d') for f in fuel_list]
     fuel_prices = [f.price_per_liter for f in fuel_list]
 
-    fuel_items = month_transactions.filter(
+    fuel_items = month_transactions_all.filter(
         is_fuel=True,
         detail_category='주유'
     ).exclude(category='income').order_by('-date', '-created_at')
@@ -333,7 +389,8 @@ def index(request):
     category_summary = defaultdict(int)
     category_detail_map = defaultdict(list)
 
-    target_items = month_transactions.filter(
+    # 카테고리 통계는 태그 무관 (전체 데이터 기준)
+    target_items = month_transactions_all.filter(
         Q(category='expense') |
         Q(category='income')
     ).order_by('-date', '-created_at')
@@ -407,6 +464,7 @@ def index(request):
         'selected_month': month_start.strftime('%Y-%m'),
         'selected_year': month_start.year,
         'selected_month_num': month_start.month,
+        'selected_tag': selected_tag,
         'stats': stats,
         'budget_left': budget_left,
 
@@ -511,6 +569,7 @@ def living(request):
         detail_category = request.POST.get("detail_category", "기타")
         description = request.POST.get("description")
         amount = int(request.POST.get("amount", 0))
+        tags_raw = request.POST.get('tags', '')  # ✅ 태그 추가
 
         category = selected_type
         saved_detail_category = detail_category
@@ -541,6 +600,9 @@ def living(request):
             elif detail_category == "현금 쓰기":
                 amount = -abs(amount)
 
+        # ✅ 태그 정리
+        tags_cleaned = ','.join([t.strip() for t in tags_raw.split(',') if t.strip()])
+
         if edit_pk:
             # 수정
             item = get_object_or_404(Transaction, pk=edit_pk)
@@ -550,6 +612,7 @@ def living(request):
             item.detail_category = saved_detail_category
             item.description = description
             item.amount = amount
+            item.tags = tags_cleaned  # ✅ 태그 저장
             item.save()
         else:
             # 신규 생성
@@ -560,16 +623,61 @@ def living(request):
                 detail_category=saved_detail_category,
                 description=description,
                 amount=amount,
+                tags=tags_cleaned,  # ✅ 태그 저장
             )
 
         return redirect(f"/living/?month={month_start.strftime('%Y-%m')}")
 
+    selected_tag = request.GET.get('tag', '')  # 태그 필터
+
     # 이번 달 거래내역
-    month_transactions = Transaction.objects.filter(
+    month_transactions_raw = Transaction.objects.filter(
         account_type="living",
         date__year=month_start.year,
         date__month=month_start.month
     ).order_by("-date", "-created_at")
+
+    # 태그 필터링
+    if selected_tag:
+        month_transactions_filtered = month_transactions_raw.filter(tags__icontains=selected_tag)
+    else:
+        month_transactions_filtered = month_transactions_raw
+
+    # 태그 색상 생성 함수
+    def generate_tag_color(tag_text):
+        """태그 텍스트 기반으로 파스텔 색상 생성"""
+        hash_val = sum(ord(c) for c in tag_text)
+        colors = [
+            ('#e8f5e9', '#2e7d32'),  # 초록
+            ('#e3f2fd', '#1565c0'),  # 파랑
+            ('#fff3e0', '#e65100'),  # 주황
+            ('#f3e5f5', '#6a1b9a'),  # 보라
+            ('#fce4ec', '#c2185b'),  # 핑크
+            ('#fff9c4', '#f57f17'),  # 노랑
+            ('#ffebee', '#c62828'),  # 빨강
+            ('#e0f2f1', '#00695c'),  # 청록
+            ('#f1f8e9', '#558b2f'),  # 라임
+            ('#ede7f6', '#4527a0'),  # 인디고
+        ]
+        return colors[hash_val % len(colors)]
+
+    # 거래내역에 태그 리스트 및 색상 추가
+    month_transactions = []
+    for item in month_transactions_filtered:
+        if item.tags:
+            item.tags_list = []
+            for t in item.tags.split(','):
+                tag_text = t.strip()
+                if tag_text:
+                    bg_color, text_color = generate_tag_color(tag_text)
+                    item.tags_list.append({
+                        'text': tag_text,
+                        'bg_color': bg_color,
+                        'text_color': text_color,
+                    })
+        else:
+            item.tags_list = []
+        month_transactions.append(item)
 
     # 전달 계산용
     if month_start.month == 1:
@@ -613,17 +721,17 @@ def living(request):
     # 현금은 가용생활비 차감 대상 아님
     carry_over = prev_income - prev_expense - prev_emergency
 
-    # 이번 달 입금 / 지출
-    total_income = month_transactions.filter(category="income").aggregate(
+    # 이번 달 입금 / 지출 (태그 무관 - 전체 기준)
+    total_income = month_transactions_raw.filter(category="income").aggregate(
         Sum("amount")
     )["amount__sum"] or 0
 
-    total_expense = month_transactions.filter(category="expense").aggregate(
+    total_expense = month_transactions_raw.filter(category="expense").aggregate(
         Sum("amount")
     )["amount__sum"] or 0
 
     # 이번 달 비상금 이동 (내 돈 이동만)
-    month_emergency = month_transactions.filter(
+    month_emergency = month_transactions_raw.filter(
         category="non_expense",
         detail_category__in=["비상금 넣기", "비상금 빼기"]
     ).aggregate(
@@ -631,14 +739,14 @@ def living(request):
     )["amount__sum"] or 0
 
     # 이번 달 비상금 직접입금 (이자, 외부돈)
-    emergency_direct_total = month_transactions.filter(
+    emergency_direct_total = month_transactions_raw.filter(
         category="non_expense",
         detail_category="비상금 직접입금"
     ).aggregate(
         Sum("amount")
     )["amount__sum"] or 0
 
-    month_cash = month_transactions.filter(
+    month_cash = month_transactions_raw.filter(
         category="non_expense",
         detail_category__startswith="현금"
     ).aggregate(
@@ -677,11 +785,11 @@ def living(request):
     # 총 보유 생활비
     total_living_assets = available_living + emergency_total + cash_total
 
-    # 카테고리별 지출 집계
+    # 카테고리별 지출 집계 (태그 무관 - 전체 기준)
     category_summary = defaultdict(int)
     category_detail_map = defaultdict(list)
 
-    for item in month_transactions.filter(category='expense').order_by('-date', '-created_at'):
+    for item in month_transactions_raw.filter(category='expense').order_by('-date', '-created_at'):
         category_name = item.detail_category or "기타"
         category_summary[category_name] += abs(item.amount)
 
@@ -777,6 +885,7 @@ def living(request):
         "selected_month": month_start.strftime("%Y-%m"),
         "selected_year": month_start.year,
         "selected_month_num": month_start.month,
+        "selected_tag": selected_tag,
         "history": month_transactions[:30],
         "detail_category_options": DETAIL_CATEGORY_OPTIONS,
 

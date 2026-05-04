@@ -27,6 +27,13 @@
                             <input type="month" id="month_picker" name="month" value="{{ selected_month }}">
                         </label>
                         <button type="submit" class="mini-btn month-btn">조회</button>
+                        
+                        {% if selected_tag %}
+                        <div class="filter-info">
+                            🏷️ <strong>{{ selected_tag }}</strong>
+                            <a href="?month={{ selected_month }}" class="clear-filter">✕</a>
+                        </div>
+                        {% endif %}
                     </div>
                 </form>
 
@@ -60,6 +67,10 @@
                         </select>
 
                         <input type="text" name="description" id="ui_desc" placeholder="내역 입력">
+
+                        <div class="form-row">
+                            <input type="text" name="tags" id="tags" placeholder="태그 예 : 데이트, 생일, 외출">
+                        </div>
 
                         <input type="number" name="amount" id="ui_amount" placeholder="금액" required>
 
@@ -184,6 +195,19 @@
                             <div class="history-desc">
                                 {{ item.description|default:"-" }}
                             </div>
+
+                            <!-- 태그 뱃지 -->
+                            {% if item.tags_list %}
+                            <div class="history-tags">
+                                {% for tag in item.tags_list %}
+                                <a href="?month={{ selected_month }}&tag={{ tag.text|urlencode }}" 
+                                   class="tag-badge"
+                                   style="background: {{ tag.bg_color }}; color: {{ tag.text_color }};">
+                                    {{ tag.text }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
                         </div>
 
                         <div class="history-actions">
@@ -209,7 +233,8 @@
                                     data-amount="{{ item.amount }}"
                                     data-is-fuel="{{ item.is_fuel|yesno:'true,false' }}"
                                     data-price="{{ item.price_per_liter|default_if_none:'' }}"
-                                    data-odometer="{{ item.odometer|default_if_none:'' }}">
+                                    data-odometer="{{ item.odometer|default_if_none:'' }}"
+                                    data-tags="{{ item.tags|default_if_none:'' }}">
                                 수정
                             </button>
                             <a href="{% url 'delete_transaction' item.pk %}" class="mini-btn danger" onclick="return confirm('삭제할까요?');">삭제</a>
@@ -675,6 +700,11 @@
                     <div>
                         <label for="main_edit_desc">내역</label>
                         <input type="text" name="description" id="main_edit_desc" class="modal-input">
+                    </div>
+
+                    <div>
+                        <label for="main_edit_tags">태그 <span style="font-size:11px; color:#999;">(쉼표로 구분)</span></label>
+                        <input type="text" name="tags" id="main_edit_tags" class="modal-input" placeholder="예: 데이트, 생일, 외출">
                     </div>
 
                     <div>

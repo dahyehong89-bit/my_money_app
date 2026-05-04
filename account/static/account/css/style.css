@@ -2953,3 +2953,66 @@ body:not(.living-page) .history-actions a.danger:hover {
     margin-left: 10px;
     flex-shrink: 0;
 }
+/* ===================== 태그 기능 ===================== */
+
+/* 태그 뱃지 영역 */
+.history-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+/* 개별 태그 */
+.tag-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.2s;
+    line-height: 1.4;
+    /* 배경/글자색은 inline style로 설정됨 */
+}
+
+.tag-badge::before {
+    content: '#';
+    opacity: 0.7;
+    margin-right: 1px;
+}
+
+.tag-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    filter: brightness(0.95);
+}
+
+/* 태그 필터 표시 */
+.filter-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff3e0;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-left: 10px;
+    border: 1px solid #ffe0b2;
+}
+
+.filter-info strong {
+    color: #e65100;
+}
+
+.clear-filter {
+    color: #999;
+    text-decoration: none;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 4px;
+    transition: color 0.2s;
+}
+
+.clear-filter:hover {
+    color: #e65100;
+}

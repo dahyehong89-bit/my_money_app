@@ -27,6 +27,13 @@
                             <input type="month" id="month_picker" name="month" value="{{ selected_month }}">
                         </label>
                         <button type="submit" class="mini-btn month-btn">조회</button>
+                        
+                        {% if selected_tag %}
+                        <div class="filter-info">
+                            🏷️ <strong>{{ selected_tag }}</strong>
+                            <a href="?month={{ selected_month }}" class="clear-filter">✕</a>
+                        </div>
+                        {% endif %}
                     </div>
                 </form>
 
@@ -53,6 +60,8 @@
                         <select name="detail_category" id="ui_detail_category" required></select>
 
                         <input type="text" name="description" id="ui_desc" placeholder="내역 입력">
+
+                        <input type="text" name="tags" id="ui_tags" placeholder="태그 예) 데이트, 생일, 외출">
 
                         <input type="number" name="amount" id="ui_amount" placeholder="금액" required>
 
@@ -186,6 +195,19 @@
                             <div class="living-history-desc">
                                 {{ item.description|default:"-" }}
                             </div>
+
+                            <!-- 태그 뱃지 -->
+                            {% if item.tags_list %}
+                            <div class="history-tags">
+                                {% for tag in item.tags_list %}
+                                <a href="?month={{ selected_month }}&tag={{ tag.text|urlencode }}" 
+                                   class="tag-badge"
+                                   style="background: {{ tag.bg_color }}; color: {{ tag.text_color }};">
+                                    {{ tag.text }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
                         </div>
 
                         <div class="living-history-right">
@@ -213,7 +235,8 @@
                                         data-category="{{ item.category }}"
                                         data-detail="{{ item.detail_category }}"
                                         data-description="{{ item.description|default_if_none:'' }}"
-                                        data-amount="{{ item.amount }}">
+                                        data-amount="{{ item.amount }}"
+                                        data-tags="{{ item.tags|default_if_none:'' }}">
                                     수정
                                 </button>
 
@@ -402,6 +425,11 @@
                     <div>
                         <label for="edit_description">내역</label>
                         <input type="text" name="description" id="edit_description" class="modal-input">
+                    </div>
+
+                    <div>
+                        <label for="edit_tags">태그 <span style="font-size:11px; color:#999;">(쉼표로 구분)</span></label>
+                        <input type="text" name="tags" id="edit_tags" class="modal-input" placeholder="예: 데이트, 생일, 외출">
                     </div>
 
                     <div>

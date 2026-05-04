@@ -451,13 +451,14 @@ function updateLivingEditDetailOptions(category, selectedValue = "") {
     });
 }
 
-function openLivingEditModal(pk, date, category, detailCategory, description, amount) {
+function openLivingEditModal(pk, date, category, detailCategory, description, amount, tags) {
     const modal = document.getElementById("livingEditModal");
     if (!modal) return;
 
     document.getElementById("edit_pk").value = pk;
     document.getElementById("edit_date").value = date;
     document.getElementById("edit_description").value = description || "";
+    document.getElementById("edit_tags").value = tags || "";
     document.getElementById("edit_amount").value = Math.abs(Number(amount));
 
     let uiCategory = category;
@@ -483,7 +484,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 this.dataset.category,
                 this.dataset.detail,
                 this.dataset.description,
-                this.dataset.amount
+                this.dataset.amount,
+                this.dataset.tags
             );
         });
     });
@@ -501,7 +503,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 this.dataset.amount,
                 this.dataset.isFuel === "true",
                 this.dataset.price,
-                this.dataset.odometer
+                this.dataset.odometer,
+                this.dataset.tags
             );
         });
     });
@@ -520,7 +523,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // 메인 가계부 수정 모달 열기
-function openMainEditModal(pk, date, account, category, detail, description, amount, isFuel, price, odometer) {
+function openMainEditModal(pk, date, account, category, detail, description, amount, isFuel, price, odometer, tags) {
     const modal = document.getElementById("mainEditModal");
     if (!modal) return;
 
@@ -529,6 +532,7 @@ function openMainEditModal(pk, date, account, category, detail, description, amo
     document.getElementById("main_edit_account").value = account;
     document.getElementById("main_edit_category").value = category;
     document.getElementById("main_edit_desc").value = description || "";
+    document.getElementById("main_edit_tags").value = tags || "";
     document.getElementById("main_edit_amount").value = Math.abs(Number(amount));
 
     updateDetailOptions("main_edit_detail", category, detail);
