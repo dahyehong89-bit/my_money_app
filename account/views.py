@@ -687,39 +687,29 @@ def living(request):
         prev_year = month_start.year
         prev_month = month_start.month - 1
 
-    prev_transactions = Transaction.objects.filter(
+    # 전달 말까지의 누적 계산 (= 이번달 이월금액)
+    prev_all_transactions = Transaction.objects.filter(
         account_type="living",
-        date__year=prev_year,
-        date__month=prev_month
+        date__lt=month_start  # 이번달 시작 전 = 전달 말까지
     )
 
-    # 전달 입금 / 지출
-    prev_income = prev_transactions.filter(category="income").aggregate(
+    prev_total_income = prev_all_transactions.filter(category="income").aggregate(
         Sum("amount")
     )["amount__sum"] or 0
 
-    prev_expense = prev_transactions.filter(category="expense").aggregate(
+    prev_total_expense = prev_all_transactions.filter(category="expense").aggregate(
         Sum("amount")
     )["amount__sum"] or 0
 
-    # 전달 비상금 / 현금 변동
-    prev_emergency = prev_transactions.filter(
+    prev_total_emergency = prev_all_transactions.filter(
         category="non_expense",
         detail_category__in=["비상금 넣기", "비상금 빼기"]
     ).aggregate(
         Sum("amount")
     )["amount__sum"] or 0
 
-    prev_cash = prev_transactions.filter(
-        category="non_expense",
-        detail_category__startswith="현금"
-    ).aggregate(
-        Sum("amount")
-    )["amount__sum"] or 0
-
-    # 전달 이월금액 = 전달 말 기준 가용생활비
-    # 현금은 가용생활비 차감 대상 아님
-    carry_over = prev_income - prev_expense - prev_emergency
+    # 이월금액 = 전달 말 가용생활비
+    carry_over = prev_total_income - prev_total_expense - prev_total_emergency
 
     # 이번 달 입금 / 지출 (태그 무관 - 전체 기준)
     total_income = month_transactions_raw.filter(category="income").aggregate(
